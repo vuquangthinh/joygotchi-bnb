@@ -10,29 +10,11 @@ import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IGameManager} from "./interfaces/IGameManager.sol";
 
-interface IToken {
-    function balanceOf(
-        address tokenOwner
-    ) external view returns (uint256 balance);
+import 'hardhat/console.sol';
 
-    function totalSupply() external view returns (uint256 supply);
-
-    function transfer(
-        address to,
-        uint256 tokens
-    ) external returns (bool success);
-
-    function transferFrom(
-        address from,
-        address to,
-        uint256 tokens
-    ) external returns (bool success);
-
-    function burnFrom(address account, uint256 amount) external;
-}
 
 // ERC721,
-contract FrenPet is Owned, ERC721 {
+contract VICNFT is Owned, ERC721 {
     using SafeTransferLib for address payable;
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
@@ -52,8 +34,6 @@ contract FrenPet is Owned, ERC721 {
     }
 
     uint256 PRECISION = 1 ether;
-
-    IToken public token;
 
     uint256 public _tokenIds;
     uint256 public _itemIds;
@@ -113,13 +93,13 @@ contract FrenPet is Owned, ERC721 {
     event Pass(uint256 from, uint256 to);
 
     constructor(
-        address _token
+        // address _token
     ) Owned(msg.sender) ERC721("Fren Pet", "Fren Pet") {
-        token = IToken(_token);
+        // token = IToken(_token);
 
-        startingPrice = 2_000 ether;
+        startingPrice = 0.2 ether;
         startAt = block.timestamp;
-        discountRate = 1900 ether / DURATION;
+        discountRate = 0.19 ether / DURATION;
     }
 
     modifier isApproved(uint256 id) {
@@ -145,14 +125,16 @@ contract FrenPet is Owned, ERC721 {
                         Game Actions
     //////////////////////////////////////////////////////////////*/
 
-    function mint() public {
+    function mint() public payable{
         require(_tokenIds < 20_000, "Over the limit");
 
         uint256 price = getPrice();
 
+        require(msg.value >= price, "Not enough value");
+
         startAt = block.timestamp;
 
-        token.burnFrom(msg.sender, price);
+        // token.burnFrom(msg.sender, price);
 
         timeUntilStarving[_tokenIds] = block.timestamp + 1 days;
         timePetBorn[_tokenIds] = block.timestamp;
@@ -175,6 +157,8 @@ contract FrenPet is Owned, ERC721 {
 
         uint256 amount = itemPrice[itemId];
 
+        require(msg.value >= amount, "Not enough value");
+
         // recalculate time until starving
         timeUntilStarving[nftId] = block.timestamp + itemTimeExtension[itemId];
 
@@ -194,8 +178,6 @@ contract FrenPet is Owned, ERC721 {
         );
 
         totalScores += itemPoints[itemId];
-
-        token.burnFrom(msg.sender, amount);
 
         emit ItemConsumed(nftId, msg.sender, itemId);
     }
