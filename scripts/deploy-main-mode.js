@@ -17,15 +17,15 @@ async function main() {
 
     console.log("Deploying contracts with the account:", deployer.address);
 
-    const Token = await ethers.getContractFactory("FrenPetToken");
+    const Token = await ethers.getContractFactory("FrenPetTokenV1");
     const token = await Token.deploy(ROUTER_ADDRESS);
     await token.waitForDeployment();
 
-    const ModeNFT = await ethers.getContractFactory("ModeNFT");
+    const ModeNFT = await ethers.getContractFactory("ModeNFTV1");
     const modeNFT = await ModeNFT.deploy(token.target);
     await modeNFT.waitForDeployment();
 
-    const GameManager = await ethers.getContractFactory("GameManager");
+    const GameManager = await ethers.getContractFactory("GameManagerV1");
     const gameManager = await GameManager.deploy(modeNFT.target);
     await gameManager.waitForDeployment();
 

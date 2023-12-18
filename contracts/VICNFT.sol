@@ -92,11 +92,7 @@ contract VICNFT is Owned, ERC721 {
 
     event Pass(uint256 from, uint256 to);
 
-    constructor(
-        // address _token
-    ) Owned(msg.sender) ERC721("Fren Pet", "Fren Pet") {
-        // token = IToken(_token);
-
+    constructor() Owned(msg.sender) ERC721("Fren Pet", "Fren Pet") {
         startingPrice = 0.2 ether;
         startAt = block.timestamp;
         discountRate = 0.19 ether / DURATION;
