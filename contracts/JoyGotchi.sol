@@ -37,7 +37,7 @@ interface FeeSharingNFT{
 }
 
 // ERC721,
-contract ModeNFT is Owned, ERC721 {
+contract JoyGotchi is Owned, ERC721 {
     using SafeTransferLib for address payable;
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
@@ -119,7 +119,7 @@ contract ModeNFT is Owned, ERC721 {
 
     constructor(
         address _token
-    ) Owned(msg.sender) ERC721("Fren Pet", "Fren Pet") {
+    ) Owned(msg.sender) ERC721("Joy Gotchi", "Joy Gotchi") {
         token = IToken(_token);
 
         startingPrice = 2_000 ether;
@@ -399,7 +399,7 @@ contract ModeNFT is Owned, ERC721 {
 
     function tokenURI(uint256 id) public view override returns (string memory) {
         // uint256 a = id;
-        string memory image = _generateSVG();
+        string memory image = _baseImgUrl();
         string memory attributes = string(
             abi.encodePacked('", "attributes":[', _generateMetadata(id), "]}")
         );
@@ -410,7 +410,7 @@ contract ModeNFT is Owned, ERC721 {
                     (
                         (
                             abi.encodePacked(
-                                '{"name":"Fren Pet #',
+                                '{"name":"Joy Gotchi #',
                                 _uint2str(id),
                                 '","image": ',
                                 '"',
@@ -423,9 +423,9 @@ contract ModeNFT is Owned, ERC721 {
             );
     }
 
-    function _generateSVG() public pure returns (string memory) {
+    function _baseImgUrl() public pure returns (string memory) {
         return
-            "data:image/svg+xml;utf8,<svg width='198' height='198' viewBox='0 0 198 198' fill='none' xmlns='http://www.w3.org/2000/svg' version='1.1' xmlns:xlink='http://www.w3.org/1999/xlink'><path fill-rule='evenodd' clip-rule='evenodd' d='M53 65H60V60H137V65H144V122H129V138H106V122H91V138H68V122H53V65ZM81 88H89V105H81V88ZM127 88H119V105H127V88Z' fill='black'/></svg>";
+            "https://bafkreiaphqcazr47nn77sr6v3nmnxkkgpndwjn7hwaksr4utc6tzz3ffse.ipfs.nftstorage.link/";
     }
 
     function _generateMetadata(
@@ -451,10 +451,6 @@ contract ModeNFT is Owned, ERC721 {
         return metadata;
     }
 
-    function risks() external pure returns (string memory) {
-        return
-            "The developers behind fren pet are retarded and test in prod, do not spend money on this unless you are going to play the game, everything in crypto is risky.";
-    }
 
     // calculate level based on points
     function level(uint256 tokenId) public view returns (uint256) {

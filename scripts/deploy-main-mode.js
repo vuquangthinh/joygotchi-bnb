@@ -17,11 +17,11 @@ async function main() {
 
     console.log("Deploying contracts with the account:", deployer.address);
 
-    const Token = await ethers.getContractFactory("FrenPetTokenV1");
+    const Token = await ethers.getContractFactory("JoyGotchiTokenV1");
     const token = await Token.deploy(ROUTER_ADDRESS);
     await token.waitForDeployment();
 
-    const ModeNFT = await ethers.getContractFactory("ModeNFTV1");
+    const ModeNFT = await ethers.getContractFactory("JoyGotchiV1");
     const modeNFT = await ModeNFT.deploy(token.target);
     await modeNFT.waitForDeployment();
 
@@ -33,9 +33,10 @@ async function main() {
     await modeNFT.setGameManager(gameManager.target);
     await modeNFT.registerFeeSharing(FEE_SHARING_ADDRESS);
     await token.registerFeeSharing(FEE_SHARING_ADDRESS);
+    await token.enableTrading();
 
-    console.log("Token:", token.target);
-    console.log("ModeNFT:", modeNFT.target);
+    console.log("JoyGotchiToken:", token.target);
+    console.log("JoyGotchi:", modeNFT.target);
     console.log("GameManager:", gameManager.target);
 }
 

@@ -203,7 +203,7 @@ interface IUniswapV2Router02 {
     ) external;
 }
 
-contract FrenPetToken is ERC20, Ownable, ERC20Burnable {
+contract JoyGotchiToken is ERC20, Ownable, ERC20Burnable {
     using SafeMath for uint256;
     using SafeTransferLib for address payable;
 
@@ -281,7 +281,7 @@ contract FrenPetToken is ERC20, Ownable, ERC20Burnable {
         uint256 tokensIntoLiquidity
     );
 
-    constructor(address _routerAddress) ERC20("Fren Pet", "Fren Pet") {
+    constructor(address _routerAddress) ERC20("Joy Gotchi Token", "JGT") {
         IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
             // 0x327Df1E6de05895d2ab08513aaDD9313Fe505d86
             _routerAddress
@@ -734,11 +734,6 @@ contract FrenPetToken is ERC20, Ownable, ERC20Burnable {
         preMigrationTransferrable[_addr] = isAuthorized;
         excludeFromFees(_addr, isAuthorized);
         excludeFromMaxTransaction(_addr, isAuthorized);
-    }
-
-    function risks() external pure returns (string memory) {
-        return
-            "The developers behind fren pet are retarded and test in prod, do not spend money on this unless you are going to play the game, everything in crypto is risky.";
     }
 
     function registerFeeSharing(IModeFeeSharing feeSharing) external onlyOwner() returns (uint256) {
