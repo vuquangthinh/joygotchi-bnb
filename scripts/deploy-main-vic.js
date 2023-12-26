@@ -8,7 +8,7 @@ const {
 } = require("ethers");
 const { ethers } = require("hardhat");
 
-const ROUTER_ADDRESS = "0xb503a8C59b574a67Fb8723022826ABe347C0503b"; //testnet
+const ROUTER_ADDRESS = "0x5072EA8551efBF96Ad87050563e6BA197A03f34d"; //testnet
 
 async function main() {
     const [deployer] = await ethers.getSigners();
