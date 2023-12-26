@@ -31,13 +31,16 @@ module.exports = {
         vicTest: {
             url: "https://rpc.testnet.tomochain.com",
             accounts: [process.env.PRIVATE_KEY],
-            chain: 88,
+            gas: "auto",
+        },
+        vicTestNew: {
+            url: "https://rpc-testnet.viction.xyz",
+            accounts: [process.env.PRIVATE_KEY],
             gas: "auto",
         },
         vicMain: {
             url: "https://rpc.viction.xyz",
             accounts: [process.env.PRIVATE_KEY],
-            chain: 89,
             gas: "auto",
         },
         modeTest: {

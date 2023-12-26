@@ -1152,10 +1152,6 @@ interface IToken {
     function burnFrom(address account, uint256 amount) external;
 }
 
-interface FeeSharingNFT{
-    function register(address _recipient) external returns (uint256);
-}
-
 // ERC721,
 contract JoyGotchiVIC is Owned, ERC721 {
     using SafeTransferLib for address payable;

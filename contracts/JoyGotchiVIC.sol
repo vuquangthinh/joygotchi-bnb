@@ -31,9 +31,6 @@ interface IToken {
     function burnFrom(address account, uint256 amount) external;
 }
 
-interface FeeSharingNFT{
-    function register(address _recipient) external returns (uint256);
-}
 
 // ERC721,
 contract JoyGotchi is Owned, ERC721 {

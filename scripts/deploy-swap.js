@@ -16,9 +16,10 @@ async function main() {
     const [deployer] = await ethers.getSigners();
 
     console.log("Deploying contracts with the account:", deployer.address);
+    let nonce = await deployer.getNonce();
 
     const WETH = await ethers.getContractFactory("MockWETH");
-    const weth = await WETH.deploy({ gasLimit: "0x1000000" });
+    const weth = await WETH.deploy({ gasLimit: "0x1000000", nonce: nonce++ });
     await weth.waitForDeployment();
 
     const Factory = new ContractFactory(
@@ -28,6 +29,7 @@ async function main() {
     );
     const factory = await Factory.deploy(deployer.address, {
         gasLimit: "0x1000000",
+        nonce: nonce++,
     });
     await factory.waitForDeployment();
 
@@ -38,6 +40,7 @@ async function main() {
     );
     const router = await Router.deploy(factory.target, weth.target, {
         gasLimit: "0x1000000",
+        nonce: nonce++,
     });
     await router.waitForDeployment();
 
