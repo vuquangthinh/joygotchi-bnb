@@ -18,7 +18,7 @@ async function main() {
     console.log("Deploying contracts with the account:", deployer.address);
 
     const WETH = await ethers.getContractFactory("MockWETH");
-    const weth = await WETH.deploy();
+    const weth = await WETH.deploy({ gasLimit: "0x1000000" });
     await weth.waitForDeployment();
 
     const Factory = new ContractFactory(
@@ -26,7 +26,9 @@ async function main() {
         factoryArtifact.bytecode,
         deployer
     );
-    const factory = await Factory.deploy(deployer.address);
+    const factory = await Factory.deploy(deployer.address, {
+        gasLimit: "0x1000000",
+    });
     await factory.waitForDeployment();
 
     const Router = new ContractFactory(
@@ -34,7 +36,9 @@ async function main() {
         routerArtifact.bytecode,
         deployer
     );
-    const router = await Router.deploy(factory.target, weth.target);
+    const router = await Router.deploy(factory.target, weth.target, {
+        gasLimit: "0x1000000",
+    });
     await router.waitForDeployment();
 
     console.log("WETH:", weth.target);
