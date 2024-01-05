@@ -6,7 +6,7 @@ const { anyValue } = require("@nomicfoundation/hardhat-chai-matchers/withArgs");
 const { expect } = require("chai");
 const { parseEther, MaxInt256 } = require("ethers");
 
-describe("Mode", function () {
+describe("Vic", function () {
     async function deployContracts() {
         const [owner] = await ethers.getSigners();
 
