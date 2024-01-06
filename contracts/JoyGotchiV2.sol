@@ -11,6 +11,7 @@ import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IGameManager} from "./interfaces/IGameManager.sol";
 import {IGenePool} from "./interfaces/IGenePool.sol";
 
+
 interface IToken {
     function balanceOf(
         address tokenOwner
@@ -93,6 +94,10 @@ contract JoyGotchiV2 is Owned, ERC721 {
     mapping(uint256 => uint256) public stars;
     mapping(uint256 => uint256) public petSpecies;
     mapping(uint256 => uint256) public petEvolutionPhase;
+    mapping(uint256 => bool) public petNeedsEvolutionItem;
+    mapping(uint256 => uint256) public petEvolutionItemId;
+    mapping(uint256 => bool) public petHasEvolutionItem;
+    mapping(uint256 => uint256) public petShield;
 
     // vritual staking
     mapping(uint256 => uint256) public ethOwed;
@@ -104,9 +109,13 @@ contract JoyGotchiV2 is Owned, ERC721 {
 
     // items/benefits for the pet, general so can be food or anything in the future.
     mapping(uint256 => uint256) public itemPrice;
+    mapping(uint256=>uint256) public itemPriceDelta;
+    mapping(uint256 => uint256) public itemStock;
     mapping(uint256 => uint256) public itemPoints;
     mapping(uint256 => string) public itemName;
     mapping(uint256 => uint256) public itemTimeExtension;
+    mapping(uint256 => uint256) public itemShield;
+    mapping(uint256 => bool) public itemIsRevival;
 
     uint256 public hasTheDiamond;
 
@@ -131,13 +140,16 @@ contract JoyGotchiV2 is Owned, ERC721 {
         address killer,
         string winnerName
     );
-    event ItemCreated(uint256 id, string name, uint256 price, uint256 points);
+    event ItemCreated(uint256 id, string name, uint256 price, uint256 points, uint256 timeExtension, uint256 shield, bool isRevival);
     event Attack(
         uint256 attacker,
         uint256 winner,
         uint256 loser,
         uint256 scoresWon
     );
+
+    event AttackBlocked(uint256 fromId, uint256 toId);
+
     event RedeemRewards(uint256 indexed petId, uint256 reward);
 
     event Pass(uint256 from, uint256 to);
@@ -197,16 +209,21 @@ contract JoyGotchiV2 is Owned, ERC721 {
         _tokenIds++;
     }
 
-    function buyAccessory(
+    function buyItem(
         uint256 nftId,
         uint256 itemId
     ) external payable isApproved(nftId) {
         require(itemExists(itemId), "This item doesn't exist");
-        require(isPetAlive(nftId), "pet dead"); //no revives
+        require(isPetAlive(nftId) || (!isPetAlive(nftId) && itemIsRevival[itemId]), "pet dead or not revival item"); //no revives
+        require(itemStock[itemId] > 0, "Out of stock");
 
-        bool shouldContinue = gameManager.onBuyAccessory(nftId, itemId);
+        if(petNeedsEvolutionItem[nftId] && petEvolutionItemId[nftId] == itemId) {
+            petHasEvolutionItem[nftId] = true;
+        }
 
-        if (!shouldContinue) return;
+        // bool shouldContinue = gameManager.onBuyAccessory(nftId, itemId);
+
+        // if (!shouldContinue) return;
 
         uint256 amount = itemPrice[itemId];
 
@@ -218,11 +235,9 @@ contract JoyGotchiV2 is Owned, ERC721 {
             ethOwed[nftId] = pendingEth(nftId);
         }
 
-        if (!isPetAlive(nftId)) {
-            petScore[nftId] = itemPoints[itemId];
-        } else {
-            petScore[nftId] += itemPoints[itemId];
-        }
+        petScore[nftId] += itemPoints[itemId];
+        petShield[nftId] += itemShield[itemId];
+
 
         petRewardDebt[nftId] = petScore[nftId].mulDivDown(
             ethAccPerShare,
@@ -230,6 +245,9 @@ contract JoyGotchiV2 is Owned, ERC721 {
         );
 
         totalScores += itemPoints[itemId];
+
+        itemPrice[itemId] += itemPriceDelta[itemId];
+        itemStock[itemId] -= 1;
 
         token.burnFrom(msg.sender, amount);
 
@@ -248,6 +266,10 @@ contract JoyGotchiV2 is Owned, ERC721 {
 
         require(level(_nftId) >= evoLevel, "Not enough level");
 
+        if(petNeedsEvolutionItem[_nftId]) {
+            require(petHasEvolutionItem[_nftId], "You need the evolution item");
+        }
+
         _evolutionPhase ++;
 
         petEvolutionPhase[_nftId] = _evolutionPhase;
@@ -257,6 +279,13 @@ contract JoyGotchiV2 is Owned, ERC721 {
 
     function attack(uint256 fromId, uint256 toId) external isApproved(fromId) {
         require(fromId != toId, "Can't hurt yourself");
+        require(isPetAlive(fromId), "Your pet is dead");
+
+        if(petShield[toId] > 0) {
+            petShield[toId] -= 1;
+            emit AttackBlocked(fromId, toId);
+            return;
+        }
 
         (uint256 pct, uint256 odds, bool canAttack) = gameManager.onAttack(
             fromId,
@@ -594,7 +623,9 @@ contract JoyGotchiV2 is Owned, ERC721 {
 
     function createSpecies(
         evolution[] memory _evolutions,
-        uint256 _genePoolNum
+        uint256 _genePoolNum,
+        bool _needEvolutionItem,
+        uint256 _evolutionItemId
 
     ) external onlyOwner {
         uint speciesId = speciesCount;
@@ -602,41 +633,60 @@ contract JoyGotchiV2 is Owned, ERC721 {
         for (uint256 i = 0; i < _evolutions.length; i++) {
             speciesToEvolutions[speciesId][i] = _evolutions[i];
         }
+        petNeedsEvolutionItem[speciesId] = _needEvolutionItem;
+        petEvolutionItemId[speciesId] = _evolutionItemId;
+        
         maxEvolutionPhase[speciesId] = _evolutions.length - 1;
         genePool.addSpeciesToGenePool(speciesId, _genePoolNum);
         speciesCount++;
         emit SpeciesCreated(speciesId, _genePoolNum);
     }
 
-    // add items/accessories
+    // add items
     function createItem(
         string calldata name,
         uint256 price,
+        uint256 priceDelta,
+        uint256 stock,
         uint256 points,
-        uint256 timeExtension
+        uint256 timeExtension,
+        uint256 shield,
+        bool isRevival
     ) external onlyOwner {
         uint256 newItemId = _itemIds;
         itemName[newItemId] = name;
         itemPrice[newItemId] = price;
+        itemPriceDelta[newItemId] = priceDelta;
+        itemStock[newItemId] = stock;
         itemPoints[newItemId] = points;
         itemTimeExtension[newItemId] = timeExtension;
+        itemShield[newItemId] = shield;
+        itemIsRevival[newItemId] = isRevival;
 
         _itemIds++;
 
-        emit ItemCreated(newItemId, name, price, points);
+        emit ItemCreated(newItemId, name, price, points, timeExtension, shield, isRevival);
     }
 
     function editItem(
         uint256 _id,
-        uint256 _price,
-        uint256 _points,
         string calldata _name,
-        uint256 _timeExtension
+        uint256 _price,
+        uint256 _priceDelta,
+        uint256 _stock,
+        uint256 _points,
+        uint256 _timeExtension,
+        uint256 _shield,
+        bool _isRevival
     ) external onlyOwner {
         itemPrice[_id] = _price;
+        itemPriceDelta[_id] = _priceDelta;
+        itemStock[_id] = _stock;
         itemPoints[_id] = _points;
         itemName[_id] = _name;
         itemTimeExtension[_id] = _timeExtension;
+        itemShield[_id] = _shield;
+        itemIsRevival[_id] = _isRevival;
     }
 
     /**
