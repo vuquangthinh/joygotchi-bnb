@@ -8,7 +8,6 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {SafeTransferLib} from "solmate/src/utils/SafeTransferLib.sol";
-import {IModeFeeSharing} from "./interfaces/IModeFeeSharing.sol";
 
 
 interface IUniswapV2Factory {
@@ -702,23 +701,23 @@ contract JoyGotchiToken is ERC20, Ownable, ERC20Burnable {
 
     function blacklist(address _addr) public onlyOwner {
         require(!blacklistRenounced, "Team has revoked blacklist rights");
-        require(
-            _addr != address(uniswapV2Pair) &&
-                _addr != address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D),
-            "Cannot blacklist token's v2 router or v2 pool."
-        );
+        // require(
+        //     _addr != address(uniswapV2Pair) &&
+        //         _addr != address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D),
+        //     "Cannot blacklist token's v2 router or v2 pool."
+        // );
         blacklisted[_addr] = true;
     }
 
     // @dev blacklist v3 pools; can unblacklist() down the road to suit project and community
     function blacklistLiquidityPool(address lpAddress) public onlyOwner {
         require(!blacklistRenounced, "Team has revoked blacklist rights");
-        require(
-            lpAddress != address(uniswapV2Pair) &&
-                lpAddress !=
-                address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D),
-            "Cannot blacklist token's v2 router or v2 pool."
-        );
+        // require(
+        //     lpAddress != address(uniswapV2Pair) &&
+        //         lpAddress !=
+        //         address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D),
+        //     "Cannot blacklist token's v2 router or v2 pool."
+        // );
         blacklisted[lpAddress] = true;
     }
 
@@ -734,9 +733,5 @@ contract JoyGotchiToken is ERC20, Ownable, ERC20Burnable {
         preMigrationTransferrable[_addr] = isAuthorized;
         excludeFromFees(_addr, isAuthorized);
         excludeFromMaxTransaction(_addr, isAuthorized);
-    }
-
-    function registerFeeSharing(IModeFeeSharing feeSharing) external onlyOwner() returns (uint256) {
-        return feeSharing.register(owner());
     }
 }

@@ -858,15 +858,6 @@ library SafeMath {
 }
 
 
-// File contracts/interfaces/IModeFeeSharing.sol
-
-// Original license: SPDX_License_Identifier: MIT
-pragma solidity ^0.8.13;
-
-interface IModeFeeSharing {
-    function register(address _recipient) external returns (uint256);
-}
-
 // File solmate/src/utils/SafeTransferLib.sol@v6.2.0
 
 // Original license: SPDX_License_Identifier: AGPL-3.0-only
@@ -1001,7 +992,6 @@ library SafeTransferLib {
 
 // Original license: SPDX_License_Identifier: MIT
 pragma solidity ^0.8.17;
-
 
 
 
@@ -1199,7 +1189,7 @@ interface IUniswapV2Router02 {
     ) external;
 }
 
-contract JoyGotchiTokenV1 is ERC20, Ownable, ERC20Burnable {
+contract JoyGotchiToken is ERC20, Ownable, ERC20Burnable {
     using SafeMath for uint256;
     using SafeTransferLib for address payable;
 
@@ -1698,23 +1688,23 @@ contract JoyGotchiTokenV1 is ERC20, Ownable, ERC20Burnable {
 
     function blacklist(address _addr) public onlyOwner {
         require(!blacklistRenounced, "Team has revoked blacklist rights");
-        require(
-            _addr != address(uniswapV2Pair) &&
-                _addr != address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D),
-            "Cannot blacklist token's v2 router or v2 pool."
-        );
+        // require(
+        //     _addr != address(uniswapV2Pair) &&
+        //         _addr != address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D),
+        //     "Cannot blacklist token's v2 router or v2 pool."
+        // );
         blacklisted[_addr] = true;
     }
 
     // @dev blacklist v3 pools; can unblacklist() down the road to suit project and community
     function blacklistLiquidityPool(address lpAddress) public onlyOwner {
         require(!blacklistRenounced, "Team has revoked blacklist rights");
-        require(
-            lpAddress != address(uniswapV2Pair) &&
-                lpAddress !=
-                address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D),
-            "Cannot blacklist token's v2 router or v2 pool."
-        );
+        // require(
+        //     lpAddress != address(uniswapV2Pair) &&
+        //         lpAddress !=
+        //         address(0x7a250d5630B4cF539739dF2C5dAcb4c659F2488D),
+        //     "Cannot blacklist token's v2 router or v2 pool."
+        // );
         blacklisted[lpAddress] = true;
     }
 
@@ -1730,9 +1720,5 @@ contract JoyGotchiTokenV1 is ERC20, Ownable, ERC20Burnable {
         preMigrationTransferrable[_addr] = isAuthorized;
         excludeFromFees(_addr, isAuthorized);
         excludeFromMaxTransaction(_addr, isAuthorized);
-    }
-
-    function registerFeeSharing(IModeFeeSharing feeSharing) external onlyOwner() returns (uint256) {
-        return feeSharing.register(owner());
     }
 }

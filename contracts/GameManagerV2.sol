@@ -30,7 +30,7 @@ contract GameManagerV2 {
         );
 
         pct = 5; //0.5%
-        odds = joyGotchi.getPetAttackWinrate(fromId); //40% odds for attacker as lower level
+        odds = joyGotchi.getPetAttackWinrate(fromId);
         canAttack = true; //can attack
     }
 

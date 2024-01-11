@@ -55,5 +55,17 @@ module.exports = {
             chainId: 34443,
             gas: "auto",
         },
+        auroraTest: {
+            url: "https://testnet.aurora.dev",
+            accounts: [process.env.PRIVATE_KEY],
+            chainId: 1313161555,
+            gas: "auto",
+        },
+        auroraMain: {
+            url: "https://mainnet.aurora.dev",
+            accounts: [process.env.PRIVATE_KEY],
+            chainId: 1313161554,
+            gas: "auto",
+        },
     },
 };
