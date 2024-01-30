@@ -1,15 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.17;
 
 import {SafeTransferLib} from "solmate/src/utils/SafeTransferLib.sol";
-
-import {Owned} from "solmate/src/auth/Owned.sol";
 import {ERC721} from "solmate/src/tokens/ERC721.sol";
 import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IGameManager} from "./interfaces/IGameManager.sol";
 import {IGenePool} from "./interfaces/IGenePool.sol";
+import "./QRNG.sol";
+
 
 
 interface IToken {
@@ -35,7 +35,7 @@ interface IToken {
 
 
 // ERC721,
-contract JoyGotchiV2 is Owned, ERC721 {
+contract JoyGotchiV2 is QRNG, ERC721 {
     using SafeTransferLib for address payable;
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
@@ -99,6 +99,10 @@ contract JoyGotchiV2 is Owned, ERC721 {
     mapping(uint256 => bool) public petHasEvolutionItem;
     mapping(uint256 => uint256) public petShield;
 
+    mapping(uint256 => uint256) public petGene;
+
+ 
+
     // vritual staking
     mapping(uint256 => uint256) public ethOwed;
     mapping(uint256 => uint256) public petRewardDebt;
@@ -157,8 +161,9 @@ contract JoyGotchiV2 is Owned, ERC721 {
     event PetEvolved(uint256 petId, uint256 species, uint256 evolutionPhase);
 
     constructor(
-        address _token
-    ) Owned(msg.sender) ERC721("Joy Gotchi", "Joy Gotchi") {
+        address _token,
+        address _qrngAirnode
+    ) QRNG(_qrngAirnode) ERC721("Joy Gotchi", "Joy Gotchi") {
         token = IToken(_token);
 
         startingPrice = 2_000 ether;
@@ -740,19 +745,18 @@ contract JoyGotchiV2 is Owned, ERC721 {
         }
     }
 
-    // ok for the use case, game.
     function random(uint256 seed) private view returns (uint) {
-        uint hashNumber = uint(
+        return uint(
             keccak256(
                 abi.encodePacked(
                     seed,
-                    block.difficulty,
+                    block.prevrandao,
                     block.timestamp,
-                    msg.sender
+                    msg.sender,
+                    walletSeed[msg.sender]
                 )
             )
-        );
-        return hashNumber % 100;
+        ) % 100;
     }
 
     function _uint2str(

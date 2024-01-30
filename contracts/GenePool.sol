@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
+interface IQRNG {
+    function walletSeed(address _address) external view returns (uint256);
+}
+
 contract GenePool {
     address public nft;
     uint256 public totalGeneNum;
@@ -22,7 +26,7 @@ contract GenePool {
     }
 
 
-    function addSpeciesToGenePool(uint _id, uint256 _geneNum)  external returns (uint256){
+    function addSpeciesToGenePool(uint _id, uint256 _geneNum) external returns (uint256){
         require(msg.sender == nft, "Unauthorized");
         require(!isSpeciesGeneInitialized[_id], "Species already added");
         isSpeciesGeneInitialized[_id] = true;
@@ -34,7 +38,8 @@ contract GenePool {
 
     function generateRandomGene(address _account, uint _nftId) external view returns (uint256) {
         require(msg.sender == nft, "Unauthorized");
-        uint256 random = uint256(keccak256(abi.encodePacked(block.timestamp, block.difficulty, _account, _nftId))) % totalGeneNum;
+        uint256 seed = IQRNG(nft).walletSeed(_account);
+        uint256 random = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, _account, _nftId, seed))) % totalGeneNum;
         for (uint256 i = 0; i < speciesCount; i++) {
             if (random >= speciesToSpawnCondition[i].gte && random <= speciesToSpawnCondition[i].lte) {
                 return i;
