@@ -67,5 +67,7 @@ contract GenePool {
         hornStyle = random % hornStyleGeneNum;
         wingStyle = random % wingStyleGeneNum;
     }
-
+    receive() external payable {
+        payable(nft).transfer(msg.value);
+    }
 }

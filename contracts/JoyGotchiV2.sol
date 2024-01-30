@@ -40,11 +40,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
 
-    // dutch auction
-    uint private constant DURATION = 10 minutes;
-    uint public startingPrice;
-    uint public startAt;
-    uint public discountRate;
+    uint public mintPrice = 2000 ether;
 
     enum Status {
         HAPPY,
@@ -169,10 +165,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         address _qrngAirnode
     ) QRNG(_qrngAirnode) ERC721("Joy Gotchi", "Joy Gotchi") {
         token = IToken(_token);
-
-        startingPrice = 2_000 ether;
-        startAt = block.timestamp;
-        discountRate = 1900 ether / DURATION;
     }
 
     modifier isApproved(uint256 id) {
@@ -184,16 +176,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         _;
     }
 
-    function getPrice() public view returns (uint256) {
-        uint256 timeElapsed = block.timestamp - startAt;
-        if (timeElapsed >= 10 minutes) {
-            return 100 ether;
-        } else {
-            uint256 discount = discountRate * timeElapsed;
-            return startingPrice - discount;
-        }
-    }
-
     /*//////////////////////////////////////////////////////////////
                         Game Actions
     //////////////////////////////////////////////////////////////*/
@@ -201,11 +183,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     function mint() public {
         require(_tokenIds < 20_000, "Over the limit");
 
-        uint256 price = getPrice();
-
-        startAt = block.timestamp;
-
-        token.burnFrom(msg.sender, price);
+        token.burnFrom(msg.sender, mintPrice);
 
         timeUntilStarving[_tokenIds] = block.timestamp + 1 days;
         timePetBorn[_tokenIds] = block.timestamp;
@@ -321,7 +299,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 loser;
         uint256 winner;
 
-        uint256 _random = random(fromId + toId);
+        uint256 _random = random(fromId + toId) % 100;
 
         if (_random > odds) {
             loser = fromId;
@@ -380,6 +358,40 @@ contract JoyGotchiV2 is QRNG, ERC721 {
             msg.sender,
             petName[_tokenId]
         );
+    }
+
+    function breed(
+        uint256 _nftId,
+        uint256 _nftId2
+    ) external isApproved(_nftId) isApproved(_nftId2) {
+        require(_nftId != _nftId2, "Can't breed with yourself");
+        require(isPetAlive(_nftId), "Pet 1 is dead");
+        require(isPetAlive(_nftId2), "Pet2 is dead");
+
+        token.burnFrom(msg.sender, mintPrice);
+
+        uint256 _random = random(_nftId + _nftId2);
+
+        uint256 _newPetSpecies = _random % 2 == 0 ? petSpecies[_nftId] : petSpecies[_nftId2];
+
+        uint256 _newPetEyeColor = _random % genePool.eyeColorGeneNum();
+        uint256 _newPetSkinColor = _random % genePool.skinColorGeneNum();
+        uint256 _newPetHornStyle = _random % genePool.hornStyleGeneNum();
+        uint256 _newPetWingStyle = _random % genePool.wingStyleGeneNum();
+
+        // mint NFT
+        _mint(msg.sender, _tokenIds);
+        _tokenIds++;
+
+        petSpecies[_tokenIds] = _newPetSpecies;
+        petEyeColor[_tokenIds] = _newPetEyeColor;
+        petSkinColor[_tokenIds] = _newPetSkinColor;
+        petHornStyle[_tokenIds] = _newPetHornStyle;
+        petWingStyle[_tokenIds] = _newPetWingStyle;
+
+        timeUntilStarving[_tokenIds] = block.timestamp + 1 days;
+        timePetBorn[_tokenIds] = block.timestamp;
+
     }
 
     function setPetName(
@@ -784,7 +796,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
                     walletSeed[msg.sender]
                 )
             )
-        ) % 100;
+        );
     }
 
     function _uint2str(
