@@ -67,5 +67,38 @@ module.exports = {
             chainId: 1313161554,
             gas: "auto",
         },
+        // for mainnet
+        "lightlink-mainnet": {
+            url: "https://replicator.phoenix.lightlink.io/rpc/v1",
+            accounts: [process.env.PRIVATE_KEY],
+            gasPrice: 1000000000,
+        },
+        // for testnet
+        "lightlink-testnet": {
+            url: "https://replicator.pegasus.lightlink.io/rpc/v1",
+            accounts: [process.env.PRIVATE_KEY],
+            gasPrice: 1000000000,
+        },
+    },
+    etherscan: {
+        apiKey: process.env.ETHERSCAN_API_KEY,
+        customChains: [
+            {
+                network: "lightlink-mainnet",
+                chainId: 1891,
+                urls: {
+                    apiURL: "https://pegasus.lightlink.io/api",
+                    browserURL: "https://pegasus.lightlink.io",
+                },
+            },
+            {
+                network: "lightlink-testnet",
+                chainId: 88,
+                urls: {
+                    apiURL: "https://devnet.lightlink.io/api",
+                    browserURL: "https://devnet.lightlink.io",
+                },
+            },
+        ],
     },
 };

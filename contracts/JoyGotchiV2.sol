@@ -93,13 +93,17 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     mapping(uint256 => uint256) public lastAttacked;
     mapping(uint256 => uint256) public stars;
     mapping(uint256 => uint256) public petSpecies;
+    mapping(uint256 => uint256) public petEyeColor;
+    mapping(uint256 => uint256) public petSkinColor;
+    mapping(uint256 => uint256) public petHornStyle;
+    mapping(uint256 => uint256) public petWingStyle;
     mapping(uint256 => uint256) public petEvolutionPhase;
     mapping(uint256 => bool) public petNeedsEvolutionItem;
     mapping(uint256 => uint256) public petEvolutionItemId;
     mapping(uint256 => bool) public petHasEvolutionItem;
     mapping(uint256 => uint256) public petShield;
 
-    mapping(uint256 => uint256) public petGene;
+
 
  
 
@@ -206,8 +210,18 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         timeUntilStarving[_tokenIds] = block.timestamp + 1 days;
         timePetBorn[_tokenIds] = block.timestamp;
 
-        uint256 newPetSpecies = genePool.generateRandomGene(msg.sender, _tokenIds);
+        (   
+            uint256 newPetSpecies,
+            uint256 newPetEyeColor,
+            uint256 newPetSkinColor,
+            uint256 newPetHornStyle,
+            uint256 newPetWingStyle
+        ) = genePool.generateRandomGene(msg.sender, _tokenIds);
         petSpecies[_tokenIds] = newPetSpecies;
+        petEyeColor[_tokenIds] = newPetEyeColor;
+        petSkinColor[_tokenIds] = newPetSkinColor;
+        petHornStyle[_tokenIds] = newPetHornStyle;
+        petWingStyle[_tokenIds] = newPetWingStyle;
 
         // mint NFT
         _mint(msg.sender, _tokenIds);
@@ -446,6 +460,18 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         _points = itemPoints[_itemId];
     }
 
+    function getPetGenes(uint256 _nftId) public view returns (string memory genes) {
+        genes = string(
+            abi.encodePacked(
+                _uint2str(petSpecies[_nftId]),
+                _uint2str(petEyeColor[_nftId]),
+                _uint2str(petSkinColor[_nftId]),
+                _uint2str(petHornStyle[_nftId]),
+                _uint2str(petWingStyle[_nftId])
+            )
+        );
+    }
+
     function getPetInfo(
         uint256 _nftId
     )
@@ -460,7 +486,8 @@ contract JoyGotchiV2 is QRNG, ERC721 {
             uint256 _lastAttacked,
             uint256 _lastAttackUsed,
             address _owner,
-            uint256 _rewards
+            uint256 _rewards,
+            string memory _genes
         )
     {
         _name = petName[_nftId];
@@ -474,6 +501,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
             ? address(0x0)
             : ownerOf(_nftId);
         _rewards = pendingEth(_nftId);
+        _genes = getPetGenes(_nftId);
     }
 
     function getPetEvolutionInfo(
