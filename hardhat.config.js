@@ -8,11 +8,11 @@ module.exports = {
     solidity: {
         compilers: [
             {
-                version: "0.8.19",
+                version: "0.8.22",
                 settings: {
                     optimizer: {
                         enabled: true,
-                        // runs: 200,
+                        runs: 200,
                     },
                 },
             },
@@ -68,13 +68,13 @@ module.exports = {
             gas: "auto",
         },
         // for mainnet
-        "lightlink-mainnet": {
+        lightlinkMain: {
             url: "https://replicator.phoenix.lightlink.io/rpc/v1",
             accounts: [process.env.PRIVATE_KEY],
             gasPrice: 1000000000,
         },
         // for testnet
-        "lightlink-testnet": {
+        lightlinkTest: {
             url: "https://replicator.pegasus.lightlink.io/rpc/v1",
             accounts: [process.env.PRIVATE_KEY],
             gasPrice: 1000000000,
@@ -84,7 +84,7 @@ module.exports = {
         apiKey: process.env.ETHERSCAN_API_KEY,
         customChains: [
             {
-                network: "lightlink-mainnet",
+                network: "lightlinkMain",
                 chainId: 1891,
                 urls: {
                     apiURL: "https://pegasus.lightlink.io/api",
@@ -92,7 +92,7 @@ module.exports = {
                 },
             },
             {
-                network: "lightlink-testnet",
+                network: "lightlinkTest",
                 chainId: 88,
                 urls: {
                     apiURL: "https://devnet.lightlink.io/api",

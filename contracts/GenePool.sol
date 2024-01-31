@@ -1,10 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.17;
 
-interface IQRNG {
-    function walletSeed(address _address) external view returns (uint256);
-}
-
 contract GenePool {
     address public nft;
     uint256 public totalGeneNum;
@@ -52,8 +48,7 @@ contract GenePool {
         return speciesCount;
     }
 
-    function generateRandomGene(address _account, uint _nftId) external view onlyNFT returns (uint256 species, uint256 eyeColor, uint256 skinColor, uint256 hornStyle, uint256 wingStyle) {
-        uint256 seed = IQRNG(nft).walletSeed(_account);
+    function generateRandomGene(address _account, uint _nftId, uint seed) external view onlyNFT returns (uint256 species, uint256 eyeColor, uint256 skinColor, uint256 hornStyle, uint256 wingStyle) {
         uint256 random = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, _account, _nftId, seed)));
         uint256 randomSpeciesNum = random % totalGeneNum;
         for (uint256 i = 0; i < speciesCount; i++) {

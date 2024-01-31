@@ -194,7 +194,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
             uint256 newPetSkinColor,
             uint256 newPetHornStyle,
             uint256 newPetWingStyle
-        ) = genePool.generateRandomGene(msg.sender, _tokenIds);
+        ) = genePool.generateRandomGene(msg.sender, _tokenIds, _getWalletSeedAndUpdateIfNeeded());
         petSpecies[_tokenIds] = newPetSpecies;
         petEyeColor[_tokenIds] = newPetEyeColor;
         petSkinColor[_tokenIds] = newPetSkinColor;
@@ -248,6 +248,8 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
         token.burnFrom(msg.sender, amount);
 
+        _getWalletSeedAndUpdateIfNeeded();
+
         emit ItemConsumed(nftId, msg.sender, itemId);
     }
 
@@ -270,6 +272,9 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         _evolutionPhase ++;
 
         petEvolutionPhase[_nftId] = _evolutionPhase;
+
+        _getWalletSeedAndUpdateIfNeeded();
+
 
         emit PetEvolved(_nftId, _species, _evolutionPhase);
     }
@@ -349,6 +354,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         stars[_tokenId] += 1;
         // redeem for dead pet
         _redeem(_deadId, ownerOfDead);
+        _getWalletSeedAndUpdateIfNeeded();
 
         emit PetKilled(
             _tokenId,
@@ -365,14 +371,21 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 _nftId2
     ) external isApproved(_nftId) isApproved(_nftId2) {
         require(_nftId != _nftId2, "Can't breed with yourself");
-        require(isPetAlive(_nftId), "Pet 1 is dead");
+        require(isPetAlive(_nftId), "Pet1 is dead");
         require(isPetAlive(_nftId2), "Pet2 is dead");
+
+        uint256 species1 = petSpecies[_nftId];
+        uint256 species2 = petSpecies[_nftId2];
+
+        require(petEvolutionPhase[_nftId] == maxEvolutionPhase[species1], "Pet1 not max evolution phase");
+        require(petEvolutionPhase[_nftId2] == maxEvolutionPhase[species2], "Pet2 not max evolution phase");
+
 
         token.burnFrom(msg.sender, mintPrice);
 
         uint256 _random = random(_nftId + _nftId2);
 
-        uint256 _newPetSpecies = _random % 2 == 0 ? petSpecies[_nftId] : petSpecies[_nftId2];
+        uint256 _newPetSpecies = _random % 2 == 0 ? species1 : species2;
 
         uint256 _newPetEyeColor = _random % genePool.eyeColorGeneNum();
         uint256 _newPetSkinColor = _random % genePool.skinColorGeneNum();
@@ -785,7 +798,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         }
     }
 
-    function random(uint256 seed) private view returns (uint) {
+    function random(uint256 seed) private returns (uint) {
         return uint(
             keccak256(
                 abi.encodePacked(
@@ -793,7 +806,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
                     block.prevrandao,
                     block.timestamp,
                     msg.sender,
-                    walletSeed[msg.sender]
+                    _getWalletSeedAndUpdateIfNeeded()
                 )
             )
         );
