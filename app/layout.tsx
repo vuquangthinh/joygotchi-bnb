@@ -1,4 +1,7 @@
 import "@/styles/globals.css";
+import '@rainbow-me/rainbowkit/styles.css';
+import "../styles/nes.css/css/nes.css"
+
 import type { Metadata } from 'next';
 import { Providers } from "./providers";
 import { fontSans } from '@/config/fonts';
