@@ -20,7 +20,10 @@ module.exports = {
     },
     networks: {
         hardhat: {
-            chainId: 31337,
+            chainId: 89,
+            forking: {
+                url: "https://replicator.pegasus.lightlink.io/rpc/v1",
+            }
         },
         sepolia: {
             url: "https://eth-sepolia.g.alchemy.com/v2/RF2vrEEq0BgZ9u8H1gY2nogOTZnEta23",
@@ -78,6 +81,11 @@ module.exports = {
             url: "https://replicator.pegasus.lightlink.io/rpc/v1",
             accounts: [process.env.PRIVATE_KEY],
             gasPrice: 1000000000,
+        },
+
+        opBNBTest: {
+            url: 'https://opbnb-testnet.nodereal.io/v1/e9a36765eb8a40b9bd12e680a1fd2bc5',
+            accounts: [process.env.PRIVATE_KEY],
         },
     },
     etherscan: {
