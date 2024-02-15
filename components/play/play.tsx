@@ -14,7 +14,7 @@ import { Breed } from "./breed";
 import { Reward } from "./reward";
 export const Play = () => {
   const [active, setActive] = useState("home");
-  const messagesEndRef = useRef(null)
+  const messagesEndRef = useRef<null | HTMLDivElement>(null); 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
   }
