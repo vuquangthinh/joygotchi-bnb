@@ -30,8 +30,8 @@ export const Battle = () => {
     const rowsPerPage = 20;
 
     const pages = useMemo(() => {
-        return petList?.total ? Math.ceil(petList.total / rowsPerPage) : 0;
-    }, [petList?.total, rowsPerPage]);
+        return petList?.length ? Math.ceil(petList.length / rowsPerPage) : 0;
+    }, [petList?.length, rowsPerPage]);
 
     const ownedPetId = React.useMemo(() => {
         const pet = typeof window !== 'undefined' ? localStorage.getItem('pet') + "" : "";
@@ -42,7 +42,7 @@ export const Battle = () => {
 
 
 
-    const renderCell = React.useCallback( (data: any, columnKey: any) => {
+    const renderCell = React.useCallback((data: any, columnKey: any) => {
 
         const cellValue = data[columnKey];
         // const res: any = await readContracts({
@@ -104,7 +104,7 @@ export const Battle = () => {
                 return (
                     <div className="relative flex justify-end items-center gap-2">
                         {
-                            ownPet && ownPet[3] < data.pet[3] && data.pet[1] !== 4 && ownPet[1] !== 4 && ownPet[6] == BigInt("0") && (data.pet[5] == BigInt("0") || Math.floor(((Math.abs(Number(new Date(Number(pet[5]))) * 1000 - Date.now())) / 1000) / 60) / 60 > 1) && (
+                            ownPet && ownPet[3] < data.pet[3] && data.pet[1] !== 4 && ownPet[1] !== 4 && ownPet[6] == BigInt("0") && (data.pet[5] == BigInt("0") || Math.floor(((Math.abs(Number(new Date(Number(data.pet[5]))) * 1000 - Date.now())) / 1000) / 60) / 60 > 1) && (
                                 <Button isIconOnly size="sm" className="p-2" color="default" aria-label="Like" onPress={() => onAttack(data.id)}>
                                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                                         <g>
@@ -276,64 +276,64 @@ export const Battle = () => {
             setOwnPet(Info[0].result);
 
         }
-        
 
+        // /next_page_params 
     }
 
     const getPetList = async () => {
-        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/v2/tokens/${process.env.NFT_ADDRESS}/instances?page=20&offset${page}`)
+        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/v2/tokens/${process.env.NFT_ADDRESS}/instances?page=20&offset=${page}`)
         response = await response.json()
         let petList = response?.items?.filter((item: any) => item.owner.hash !== address && item.owner.hash !== '0x0000000000000000000000000000000000000000');
-         
-  let newPetList = [];
-  for (const data in petList) {
-    console.log("petList",data)
-    // code block to be executed
-        const res: any = await readContracts({
-            contracts: [
-                {
-                    address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
-                    abi: nftAbi,
-                    functionName: 'getPetInfo',
-                    args: [BigInt(data)],
-                }
-            ],
-        })
-        const pet = res[0].result;
-        const InfoAttr: any = await readContracts({
-            contracts: [
-                {
-                    address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
-                    abi: nftAbi,
-                    functionName: 'getPetAttributes',
-                    args: [BigInt(data)],
-                }
-            ],
-        })
-        const petInfoAttr = InfoAttr[0].result
-        const InfoEvol: any = await readContracts({
-            contracts: [
-                {
-                    address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
-                    abi: nftAbi,
-                    functionName: 'getPetEvolutionInfo',
-                    args: [BigInt(data)],
-                }
-            ],
-        })
-        const petInfoEvol = InfoEvol[0].result
-        newPetList.push({pet:pet,petInfoAttr:petInfoAttr,petInfoEvol:petInfoEvol,id:data})
-  }
+
+        let newPetList = [];
+        for (const data in petList) {
+            console.log("petList", data)
+            // code block to be executed
+            const res: any = await readContracts({
+                contracts: [
+                    {
+                        address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
+                        abi: nftAbi,
+                        functionName: 'getPetInfo',
+                        args: [BigInt(data)],
+                    }
+                ],
+            })
+            const pet = res[0].result;
+            const InfoAttr: any = await readContracts({
+                contracts: [
+                    {
+                        address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
+                        abi: nftAbi,
+                        functionName: 'getPetAttributes',
+                        args: [BigInt(data)],
+                    }
+                ],
+            })
+            const petInfoAttr = InfoAttr[0].result
+            const InfoEvol: any = await readContracts({
+                contracts: [
+                    {
+                        address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
+                        abi: nftAbi,
+                        functionName: 'getPetEvolutionInfo',
+                        args: [BigInt(data)],
+                    }
+                ],
+            })
+            const petInfoEvol = InfoEvol[0].result
+            newPetList.push({ pet: pet, petInfoAttr: petInfoAttr, petInfoEvol: petInfoEvol, id: data })
+        }
 
 
         setPetList(newPetList);
         setLoadingState(true);
-        console.log("petList",newPetList)
+        console.log("petList", newPetList)
     }
     React.useEffect(() => {
 
         getPetList()
-    },[page])
+    }, [page])
 
     useContractEvent({
         address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,

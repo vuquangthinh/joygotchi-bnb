@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState , useRef  , useEffect} from "react";
 import {
   Link,
   Image,
@@ -14,6 +14,13 @@ import { Breed } from "./breed";
 import { Reward } from "./reward";
 export const Play = () => {
   const [active, setActive] = useState("home");
+  const messagesEndRef = useRef(null)
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }
+  useEffect(() => {
+    scrollToBottom()
+  }, []);
   return (
     <>
       <main className="container mx-auto max-w-7xl  flex-grow">
@@ -86,6 +93,7 @@ export const Play = () => {
             <span className="text-sm text-gray-500 text-gray-500  group-hover:text-blue-600 dark:group-hover:text-blue-500"></span>
           </Link>
         </div>
+        <div ref={messagesEndRef} />
       </div>
     </>
   );
