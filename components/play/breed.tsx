@@ -123,7 +123,8 @@ export const Breed = () => {
         else {
             setIsAddress(false);
         };
-        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/v2/tokens/${process.env.NFT_ADDRESS}/instances`)
+        //api/tx/getAssetTransferByAddress?page=1&&pageSize=20&address=
+        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/token/getTokensByAddress?address=${process.env.NFT_ADDRESS}&pageSize=0x64`)
         response = await response.json()
         const petArr: any = [];
         const petArrA: any = [];

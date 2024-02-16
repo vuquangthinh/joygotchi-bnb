@@ -281,7 +281,7 @@ export const Battle = () => {
     }
 
     const getPetList = async () => {
-        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/v2/tokens/${process.env.NFT_ADDRESS}/instances?page=20&offset=${page}`)
+        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/tx/getAssetTransferByAddress?page=${page}&&pageSize=20&address=${process.env.NFT_ADDRESS}`)
         response = await response.json()
         let petList = response?.items?.filter((item: any) => item.owner.hash !== address && item.owner.hash !== '0x0000000000000000000000000000000000000000');
 

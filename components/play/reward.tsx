@@ -13,8 +13,7 @@ export const Reward = () => {
     const { address } = useAccount();
 
     const fetchMyAPI = async () => {
-        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/tokentx/nft/list?tokenAddress=${process.env.TOKEN_ADDRESS}`)
-        response = await response.json()
+
         const pet = localStorage.getItem('pet');
         let petId: any = null;
         if (pet) {

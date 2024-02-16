@@ -2,17 +2,18 @@
 const nextConfig = {
   reactStrictMode: true,
   env: {
-      CHAIN_ID: 1891,
-      CHAIN_NAME: "Lightlink Pegasus Testnet",
-      CHAIN_NETWORK: "Pegasus",
-      TOKEN: "ETHEREUM",
-      SYMBOL: "ETH",
-      RPC: "https://replicator.pegasus.lightlink.io/rpc/v1",
-      URL_FAUCET: "https://faucet.pegasus.lightlink.io/",
-      NFT_ADDRESS:'0x32f93910803B544C4c58240cc5E7B94678A4BD57',
-      TOKEN_ADDRESS:'0xc9D2EDF36Ed48Cc3110c2D833bAc3420df12Ba5a',
-      FAUCET_ADDRESS:'0xCC5D4595ec07e570d00ad7eF3213062071E5E00f',
-      EXPLORER_URL:'https://pegasus.lightlink.io'
+      CHAIN_ID: 5611,
+      CHAIN_NAME: "opBNB Testnet",
+      CHAIN_NETWORK: "opBNB",
+      TOKEN: "BNB",
+      SYMBOL: "tBNB",
+      RPC: "https://opbnb-testnet-rpc.bnbchain.org",
+      URL_FAUCET: "https://opbnb-testnet-bridge.bnbchain.org/deposit",
+      NFT_ADDRESS:'0x6Ed360D1D320E55E7Cb1e7c3a4D4476dBa8E6740',
+      TOKEN_ADDRESS:'0xFcC9665bc183A899994E7793ecA500947D67134c',
+      FAUCET_ADDRESS:'0xE94859c241eF396263fC9C9CBC43e9EC2656694D',
+      DAO_ADDRESS:'0xCF0721c0b51ACe51B80D35cD3628c58eb5A06499',
+      EXPLORER_URL:'https://op-bnb-mainnet-explorer-api.nodereal.io'
     },
 }
 

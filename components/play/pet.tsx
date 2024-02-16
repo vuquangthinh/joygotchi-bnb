@@ -90,13 +90,12 @@ export const Pet = () => {
         else {
             setIsAddress(false);
         };
-        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/v2/tokens/${process.env.NFT_ADDRESS}/instances`)
+       // https://op-bnb-mainnet-explorer-api.nodereal.io/api/token/getTokensByAddress?address=0x7fdce7ecc58b799b287c44ff57f159f5579e4bf8&pageSize=0x64
+        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/token/getTokensByAddress?address=${process.env.NFT_ADDRESS}&pageSize=0x64`)
         response = await response.json()
         const petArr: any = [];
         let checkPet = false;
         let checkPetId = await localStorage.getItem('pet')
-        console.log("checkPetId", checkPetId, typeof checkPetId)
-        console.log("petcheck", response)
         if (response.items) {
             for (const element of response.items) {
 
