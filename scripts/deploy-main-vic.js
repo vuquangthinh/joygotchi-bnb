@@ -41,7 +41,7 @@ async function main() {
     console.log("GameManager:", gameManager.target);
 
     const GenePool = await ethers.getContractFactory("GenePool");
-    const genePool = await GenePool.deploy(modeNFT.target, {
+    const genePool = await GenePool.deploy(modeNFT.target, 2, 2, 2, 2, {
         gasLimit: "0x5000000",
         nonce: nonce++,
     });
@@ -79,6 +79,14 @@ async function main() {
     // enable trading
 
     console.log("Done");
+
+
+    const dao = await ethers.getContractFactory('DAO');
+    await dao.deploy(
+        '0xa07445899cB686F304a89bBC3AEbE93Ae78eBeeB',
+        await token.getAddress(),
+
+    );
 }
 
 main()

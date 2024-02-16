@@ -2,15 +2,13 @@
 
 pragma solidity ^0.8.17;
 
+import {Owned} from "solmate/src/auth/Owned.sol";
 import {SafeTransferLib} from "solmate/src/utils/SafeTransferLib.sol";
 import {ERC721} from "solmate/src/tokens/ERC721.sol";
 import {FixedPointMathLib} from "solmate/src/utils/FixedPointMathLib.sol";
 import {SafeMath} from "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import {IGameManager} from "./interfaces/IGameManager.sol";
 import {IGenePool} from "./interfaces/IGenePool.sol";
-import "./QRNG.sol";
-
-
 
 interface IToken {
     function balanceOf(
@@ -33,9 +31,8 @@ interface IToken {
     function burnFrom(address account, uint256 amount) external;
 }
 
-
 // ERC721,
-contract JoyGotchiV2 is QRNG, ERC721 {
+contract JoyGotchiV2 is Owned, ERC721 {
     using SafeTransferLib for address payable;
     using FixedPointMathLib for uint256;
     using SafeMath for uint256;
@@ -75,10 +72,9 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     }
 
     mapping(uint256 => species) public speciesList;
-    mapping(uint256 => mapping(uint256 => evolution)) public speciesToEvolutions;
+    mapping(uint256 => mapping(uint256 => evolution))
+        public speciesToEvolutions;
     mapping(uint256 => uint256) public maxEvolutionPhase;
-
-    
 
     // pet properties
     mapping(uint256 => string) public petName;
@@ -99,10 +95,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     mapping(uint256 => bool) public petHasEvolutionItem;
     mapping(uint256 => uint256) public petShield;
 
-
-
- 
-
     // vritual staking
     mapping(uint256 => uint256) public ethOwed;
     mapping(uint256 => uint256) public petRewardDebt;
@@ -113,7 +105,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
     // items/benefits for the pet, general so can be food or anything in the future.
     mapping(uint256 => uint256) public itemPrice;
-    mapping(uint256=>uint256) public itemPriceDelta;
+    mapping(uint256 => uint256) public itemPriceDelta;
     mapping(uint256 => uint256) public itemStock;
     mapping(uint256 => uint256) public itemPoints;
     mapping(uint256 => string) public itemName;
@@ -130,10 +122,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
                              Events
     //////////////////////////////////////////////////////////////*/
 
-    event SpeciesCreated(
-        uint256 id,
-        uint256 genePoolNum
-    );
+    event SpeciesCreated(uint256 id, uint256 genePoolNum);
 
     event ItemConsumed(uint256 nftId, address giver, uint256 itemId);
     event PetKilled(
@@ -144,7 +133,15 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         address killer,
         string winnerName
     );
-    event ItemCreated(uint256 id, string name, uint256 price, uint256 points, uint256 timeExtension, uint256 shield, bool isRevival);
+    event ItemCreated(
+        uint256 id,
+        string name,
+        uint256 price,
+        uint256 points,
+        uint256 timeExtension,
+        uint256 shield,
+        bool isRevival
+    );
     event Attack(
         uint256 attacker,
         uint256 winner,
@@ -161,9 +158,8 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     event PetEvolved(uint256 petId, uint256 species, uint256 evolutionPhase);
 
     constructor(
-        address _token,
-        address _qrngAirnode
-    ) QRNG(_qrngAirnode) ERC721("Joy Gotchi", "Joy Gotchi") {
+        address _token
+    ) Owned(msg.sender) ERC721("Joy Gotchi", "Joy Gotchi") {
         token = IToken(_token);
     }
 
@@ -188,13 +184,17 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         timeUntilStarving[_tokenIds] = block.timestamp + 1 days;
         timePetBorn[_tokenIds] = block.timestamp;
 
-        (   
+        (
             uint256 newPetSpecies,
             uint256 newPetEyeColor,
             uint256 newPetSkinColor,
             uint256 newPetHornStyle,
             uint256 newPetWingStyle
-        ) = genePool.generateRandomGene(msg.sender, _tokenIds, _getWalletSeedAndUpdateIfNeeded());
+        ) = genePool.generateRandomGene(
+                msg.sender,
+                _tokenIds,
+                random(_tokenIds)
+            );
         petSpecies[_tokenIds] = newPetSpecies;
         petEyeColor[_tokenIds] = newPetEyeColor;
         petSkinColor[_tokenIds] = newPetSkinColor;
@@ -211,10 +211,15 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 itemId
     ) external payable isApproved(nftId) {
         require(itemExists(itemId), "This item doesn't exist");
-        require(isPetAlive(nftId) || (!isPetAlive(nftId) && itemIsRevival[itemId]), "pet dead or not revival item"); //no revives
+        require(
+            isPetAlive(nftId) || (!isPetAlive(nftId) && itemIsRevival[itemId]),
+            "pet dead or not revival item"
+        ); //no revives
         require(itemStock[itemId] > 0, "Out of stock");
 
-        if(petNeedsEvolutionItem[nftId] && petEvolutionItemId[nftId] == itemId) {
+        if (
+            petNeedsEvolutionItem[nftId] && petEvolutionItemId[nftId] == itemId
+        ) {
             petHasEvolutionItem[nftId] = true;
         }
 
@@ -227,14 +232,12 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         // recalculate time until starving
         timeUntilStarving[nftId] = block.timestamp + itemTimeExtension[itemId];
 
-
         if (petScore[nftId] > 0) {
             ethOwed[nftId] = pendingEth(nftId);
         }
 
         petScore[nftId] += itemPoints[itemId];
         petShield[nftId] += itemShield[itemId];
-
 
         petRewardDebt[nftId] = petScore[nftId].mulDivDown(
             ethAccPerShare,
@@ -248,33 +251,30 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
         token.burnFrom(msg.sender, amount);
 
-        _getWalletSeedAndUpdateIfNeeded();
-
         emit ItemConsumed(nftId, msg.sender, itemId);
     }
 
-    function evolve(
-        uint256 _nftId
-    ) external isApproved(_nftId) {
+    function evolve(uint256 _nftId) external isApproved(_nftId) {
         uint256 _species = petSpecies[_nftId];
         uint256 _evolutionPhase = petEvolutionPhase[_nftId];
 
-        require(_evolutionPhase < maxEvolutionPhase[_species], "Max evolution phase reached");
+        require(
+            _evolutionPhase < maxEvolutionPhase[_species],
+            "Max evolution phase reached"
+        );
 
-        uint256 evoLevel = speciesToEvolutions[_species][_evolutionPhase].nextEvolutionLevel;
+        uint256 evoLevel = speciesToEvolutions[_species][_evolutionPhase]
+            .nextEvolutionLevel;
 
         require(level(_nftId) >= evoLevel, "Not enough level");
 
-        if(petNeedsEvolutionItem[_nftId]) {
+        if (petNeedsEvolutionItem[_nftId]) {
             require(petHasEvolutionItem[_nftId], "You need the evolution item");
         }
 
-        _evolutionPhase ++;
+        _evolutionPhase++;
 
         petEvolutionPhase[_nftId] = _evolutionPhase;
-
-        _getWalletSeedAndUpdateIfNeeded();
-
 
         emit PetEvolved(_nftId, _species, _evolutionPhase);
     }
@@ -283,7 +283,7 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         require(fromId != toId, "Can't hurt yourself");
         require(isPetAlive(fromId), "Your pet is dead");
 
-        if(petShield[toId] > 0) {
+        if (petShield[toId] > 0) {
             petShield[toId] -= 1;
             emit AttackBlocked(fromId, toId);
             return;
@@ -354,7 +354,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         stars[_tokenId] += 1;
         // redeem for dead pet
         _redeem(_deadId, ownerOfDead);
-        _getWalletSeedAndUpdateIfNeeded();
 
         emit PetKilled(
             _tokenId,
@@ -377,9 +376,14 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 species1 = petSpecies[_nftId];
         uint256 species2 = petSpecies[_nftId2];
 
-        require(petEvolutionPhase[_nftId] == maxEvolutionPhase[species1], "Pet1 not max evolution phase");
-        require(petEvolutionPhase[_nftId2] == maxEvolutionPhase[species2], "Pet2 not max evolution phase");
-
+        require(
+            petEvolutionPhase[_nftId] == maxEvolutionPhase[species1],
+            "Pet1 not max evolution phase"
+        );
+        require(
+            petEvolutionPhase[_nftId2] == maxEvolutionPhase[species2],
+            "Pet2 not max evolution phase"
+        );
 
         token.burnFrom(msg.sender, mintPrice);
 
@@ -404,7 +408,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
         timeUntilStarving[_tokenIds] = block.timestamp + 1 days;
         timePetBorn[_tokenIds] = block.timestamp;
-
     }
 
     function setPetName(
@@ -485,7 +488,9 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         _points = itemPoints[_itemId];
     }
 
-    function getPetGenes(uint256 _nftId) public view returns (string memory genes) {
+    function getPetGenes(
+        uint256 _nftId
+    ) public view returns (string memory genes) {
         genes = string(
             abi.encodePacked(
                 _uint2str(petSpecies[_nftId]),
@@ -531,29 +536,35 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
     function getPetEvolutionInfo(
         uint256 _nftId
-    )external view returns (
-        uint256 _species,
-        uint256 _evolutionPhase,
-        string memory _image,
-        string memory _speciesName,
-        uint256 _attackWinRate
-    ){
+    )
+        external
+        view
+        returns (
+            uint256 _species,
+            uint256 _evolutionPhase,
+            string memory _image,
+            string memory _speciesName,
+            uint256 _attackWinRate
+        )
+    {
         _species = petSpecies[_nftId];
         _evolutionPhase = petEvolutionPhase[_nftId];
         _image = speciesToEvolutions[_species][_evolutionPhase].image;
         _speciesName = speciesToEvolutions[_species][_evolutionPhase].name;
-        _attackWinRate = speciesToEvolutions[_species][_evolutionPhase].attackWinRate;
+        _attackWinRate = speciesToEvolutions[_species][_evolutionPhase]
+            .attackWinRate;
     }
 
-    function getPetAttackWinrate (
+    function getPetAttackWinrate(
         uint256 _nftId
     ) public view returns (uint256 _attackWinRate) {
         uint256 _species = petSpecies[_nftId];
         uint256 _evolutionPhase = petEvolutionPhase[_nftId];
-        _attackWinRate = speciesToEvolutions[_species][_evolutionPhase].attackWinRate;
+        _attackWinRate = speciesToEvolutions[_species][_evolutionPhase]
+            .attackWinRate;
     }
 
-    function getPetImage (
+    function getPetImage(
         uint256 _nftId
     ) public view returns (string memory _image) {
         uint256 _species = petSpecies[_nftId];
@@ -591,7 +602,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
             );
     }
 
-
     function _generateMetadata(
         uint256 id
     ) internal view returns (string memory) {
@@ -614,7 +624,6 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         );
         return metadata;
     }
-
 
     // calculate level based on points
     function level(uint256 tokenId) public view returns (uint256) {
@@ -684,20 +693,49 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         uint256 _genePoolNum,
         bool _needEvolutionItem,
         uint256 _evolutionItemId
-
     ) external onlyOwner {
+        _createSpecies(
+            _evolutions,
+            _genePoolNum,
+            _needEvolutionItem,
+            _evolutionItemId
+        );
+    }
+
+    function _createSpecies(
+        evolution[] memory _evolutions,
+        uint256 _genePoolNum,
+        bool _needEvolutionItem,
+        uint256 _evolutionItemId
+    ) internal {
         uint speciesId = speciesCount;
-        speciesList[speciesCount] = species(speciesId,  _genePoolNum);
+        speciesList[speciesCount] = species(speciesId, _genePoolNum);
         for (uint256 i = 0; i < _evolutions.length; i++) {
             speciesToEvolutions[speciesId][i] = _evolutions[i];
         }
         petNeedsEvolutionItem[speciesId] = _needEvolutionItem;
         petEvolutionItemId[speciesId] = _evolutionItemId;
-        
+
         maxEvolutionPhase[speciesId] = _evolutions.length - 1;
         genePool.addSpeciesToGenePool(speciesId, _genePoolNum);
         speciesCount++;
         emit SpeciesCreated(speciesId, _genePoolNum);
+    }
+
+    function createSpeciesBatch(
+        evolution[][] memory _evolutions,
+        uint256[] memory _genePoolNum,
+        bool[] memory _needEvolutionItem,
+        uint256[] memory _evolutionItemId
+    ) external onlyOwner {
+        for (uint256 i = 0; i < _evolutions.length; i++) {
+            _createSpecies(
+                _evolutions[i],
+                _genePoolNum[i],
+                _needEvolutionItem[i],
+                _evolutionItemId[i]
+            );
+        }
     }
 
     // add items
@@ -723,7 +761,15 @@ contract JoyGotchiV2 is QRNG, ERC721 {
 
         _itemIds++;
 
-        emit ItemCreated(newItemId, name, price, points, timeExtension, shield, isRevival);
+        emit ItemCreated(
+            newItemId,
+            name,
+            price,
+            points,
+            timeExtension,
+            shield,
+            isRevival
+        );
     }
 
     function editItem(
@@ -798,18 +844,18 @@ contract JoyGotchiV2 is QRNG, ERC721 {
         }
     }
 
-    function random(uint256 seed) private returns (uint) {
-        return uint(
+    function random(uint256 seed) private view returns (uint) {
+        uint hashNumber = uint(
             keccak256(
                 abi.encodePacked(
                     seed,
                     block.prevrandao,
                     block.timestamp,
-                    msg.sender,
-                    _getWalletSeedAndUpdateIfNeeded()
+                    msg.sender
                 )
             )
         );
+        return hashNumber % 100;
     }
 
     function _uint2str(
@@ -839,5 +885,4 @@ contract JoyGotchiV2 is QRNG, ERC721 {
     receive() external payable {
         ethAccPerShare += msg.value.mulDivDown(PRECISION, totalScores);
     }
-
 }

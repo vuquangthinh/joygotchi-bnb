@@ -54,11 +54,12 @@ describe('DAO', function () {
     // approve
     await govToken.connect(user).approve(await dao.getAddress(), ethers.MaxUint256);
     
+    
     await dao.connect(user).createProposal(
-      "test1",
-      await sc.getAddress(),
-      sc.interface.encodeFunctionData('setValue', [456]),
-      ethers.parseEther('10')
+      "test1", // Tạo proposal với tiêu đề là test1
+      await sc.getAddress(), // địa chỉ của sc thực thi logic
+      sc.interface.encodeFunctionData('setValue', [456]), // sinh payload tham số của DAO
+      ethers.parseEther('10') // phần thưởng nhận được khi proposal được chấp thuận
     );
 
     expect(await dao.reachThreshold(0)).to.be.eq(false);

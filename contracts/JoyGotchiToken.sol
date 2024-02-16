@@ -281,19 +281,22 @@ contract JoyGotchiToken is ERC20, Ownable, ERC20Burnable {
     );
 
     constructor(address _routerAddress) ERC20("Joy Gotchi Token", "JGT") {
-        IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
-            // 0x327Df1E6de05895d2ab08513aaDD9313Fe505d86
-            _routerAddress
-        ); //base swap
 
-        excludeFromMaxTransaction(address(_uniswapV2Router), true);
-        uniswapV2Router = _uniswapV2Router;
-
-        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
-            .createPair(address(this), _uniswapV2Router.WETH());
-
-        excludeFromMaxTransaction(address(uniswapV2Pair), true);
-        _setAutomatedMarketMakerPair(address(uniswapV2Pair), true);
+        if (_routerAddress != address(0)) {
+            IUniswapV2Router02 _uniswapV2Router = IUniswapV2Router02(
+                // 0x327Df1E6de05895d2ab08513aaDD9313Fe505d86
+                _routerAddress
+            ); //base swap
+    
+            excludeFromMaxTransaction(address(_uniswapV2Router), true);
+            uniswapV2Router = _uniswapV2Router;
+    
+            uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
+                .createPair(address(this), _uniswapV2Router.WETH());
+    
+            excludeFromMaxTransaction(address(uniswapV2Pair), true);
+            _setAutomatedMarketMakerPair(address(uniswapV2Pair), true);
+        }
 
         uint256 _buyRevShareFee = 2;
         uint256 _buyLiquidityFee = 1;
