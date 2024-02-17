@@ -37,6 +37,8 @@ export const Create = (props: CardProps) => {
   const [title, setTitle] = React.useState("")
   const [description, setDescription] = React.useState("")
   const [dataVote, setDataVote] = React.useState("")
+  
+
   const handleChangeTitle = (e:any) => {
     setTitle(e.target.value);
   }
@@ -188,7 +190,7 @@ export const Create = (props: CardProps) => {
       ]
     ];
 
-    setDataVote(JSON.stringify(species));
+    setDataVote(JSON.stringify(species, null, "\t"));
     fetchMyAPI();
 
   }, [allowance, tokenBlanceData])
@@ -207,8 +209,8 @@ export const Create = (props: CardProps) => {
           fetchMyAPI();
       }
   })
-  //create Proposal
 
+  //create Proposal
 
   const onCreateProposal = async (itemId: any) => {
 
@@ -323,11 +325,13 @@ export const Create = (props: CardProps) => {
                   />
                   <Select
                     label="Vote"
+                    
+                    defaultSelectedKeys={["pet"]}
                     placeholder="Select type"
                   >
-                    <SelectItem key="food" value="food">
+                    {/* <SelectItem key="food" value="food">
                       Create Food
-                    </SelectItem>
+                    </SelectItem> */}
                     <SelectItem key="pet" value="pet">
                       Create Pet
                     </SelectItem>
