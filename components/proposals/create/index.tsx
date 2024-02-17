@@ -27,14 +27,25 @@ import {
   useSwitchNetwork,
   useWaitForTransaction
 } from "wagmi";
-
+import { readContracts, watchAccount, writeContract, prepareWriteContract } from '@wagmi/core'
 export const Create = (props: CardProps) => {
   const { chain } = useNetwork()
   const [isClient, setIsClient] = React.useState(true)
   const [isBlance, setIsBlance] = React.useState(false)
   const [isEthBlance, setEthBlance] = React.useState(false)
   const [isApprove, setIsApprove] = React.useState(false)
-
+  const [title, setTitle] = React.useState("")
+  const [description, setDescription] = React.useState("")
+  const [dataVote, setDataVote] = React.useState("")
+  const handleChangeTitle = (e:any) => {
+    setTitle(e.target.value);
+  }
+  const handleChangeDescription = (e:any) => {
+    setDescription(e.target.value);
+  }
+  const handleChangeData = (e:any) => {
+    setDataVote(e.target.value);
+  }
   const MAX_ALLOWANCE = BigInt('20000000000000000000000')
   const { address } = useAccount()
 
@@ -95,7 +106,89 @@ export const Create = (props: CardProps) => {
       setIsClient(true);
     }
   }
+  (BigInt.prototype as any).toJSON = function () {
+    return this.toString();
+  };
   React.useEffect(() => {
+    const species = [
+      [
+        [{
+          image: "https://bafkreigw3j7bn3yhkbqt2ercytjhghzn462n5pxzyig4lptuyv4zv6gn6y.ipfs.nftstorage.link/",
+          name: "1",
+          attackWinRate: BigInt("20"),
+          nextEvolutionLevel: BigInt("1")
+        },
+        {
+          image: "https://bafkreiaqk7mr45wnjwtb4lyv4gpy5rloma3sxq3fq2t6s43tcy3ovnki4m.ipfs.nftstorage.link/",
+          name: "2",
+          attackWinRate: BigInt("25"),
+          nextEvolutionLevel: BigInt("2")
+        },
+        {
+          image: "https://bafkreiav7btv3nuei6znfpttelgln5tdcz7pfllcio333og4qwnbkwltoa.ipfs.nftstorage.link/",
+          name: "3",
+          attackWinRate: BigInt("35"),
+          nextEvolutionLevel: BigInt("3")
+        }
+        ],
+        BigInt("10"),
+        true,
+        BigInt("0"),
+        { skinColor: BigInt("0"), hornStyle: BigInt("0"), wingStyle: BigInt("0") }
+      ],
+      [
+        [{
+          image: "https://bafkreigw3j7bn3yhkbqt2ercytjhghzn462n5pxzyig4lptuyv4zv6gn6y.ipfs.nftstorage.link/",
+          name: "1",
+          attackWinRate: BigInt("20"),
+          nextEvolutionLevel: BigInt("1")
+        },
+        {
+          image: "https://bafkreiaqk7mr45wnjwtb4lyv4gpy5rloma3sxq3fq2t6s43tcy3ovnki4m.ipfs.nftstorage.link/",
+          name: "2",
+          attackWinRate: BigInt("25"),
+          nextEvolutionLevel: BigInt("2")
+        },
+        {
+          image: "https://bafkreiav7btv3nuei6znfpttelgln5tdcz7pfllcio333og4qwnbkwltoa.ipfs.nftstorage.link/",
+          name: "3",
+          attackWinRate: BigInt("35"),
+          nextEvolutionLevel: BigInt("3")
+        }
+        ],
+        BigInt("10"),
+        true,
+        BigInt("0"),
+        { skinColor: BigInt("0"), hornStyle: BigInt("0"), wingStyle: BigInt("0") }
+      ],
+      [
+        [{
+          image: "https://bafkreigw3j7bn3yhkbqt2ercytjhghzn462n5pxzyig4lptuyv4zv6gn6y.ipfs.nftstorage.link/",
+          name: "1",
+          attackWinRate: BigInt("20"),
+          nextEvolutionLevel: BigInt("1")
+        },
+        {
+          image: "https://bafkreiaqk7mr45wnjwtb4lyv4gpy5rloma3sxq3fq2t6s43tcy3ovnki4m.ipfs.nftstorage.link/",
+          name: "2",
+          attackWinRate: BigInt("25"),
+          nextEvolutionLevel: BigInt("2")
+        },
+        {
+          image: "https://bafkreiav7btv3nuei6znfpttelgln5tdcz7pfllcio333og4qwnbkwltoa.ipfs.nftstorage.link/",
+          name: "3",
+          attackWinRate: BigInt("35"),
+          nextEvolutionLevel: BigInt("3")
+        }
+        ],
+        BigInt("10"),
+        true,
+        BigInt("0"),
+        { skinColor: BigInt("0"), hornStyle: BigInt("0"), wingStyle: BigInt("0") }
+      ]
+    ];
+
+    setDataVote(JSON.stringify(species));
     fetchMyAPI();
 
   }, [allowance, tokenBlanceData])
@@ -115,107 +208,36 @@ export const Create = (props: CardProps) => {
       }
   })
   //create Proposal
-  const species = [
-    [
-      [{
-        image: "https://bafkreigw3j7bn3yhkbqt2ercytjhghzn462n5pxzyig4lptuyv4zv6gn6y.ipfs.nftstorage.link/",
-        name: "1",
-        attackWinRate: BigInt("20"),
-        nextEvolutionLevel: BigInt("1")
-      },
-      {
-        image: "https://bafkreiaqk7mr45wnjwtb4lyv4gpy5rloma3sxq3fq2t6s43tcy3ovnki4m.ipfs.nftstorage.link/",
-        name: "2",
-        attackWinRate: BigInt("25"),
-        nextEvolutionLevel: BigInt("2")
-      },
-      {
-        image: "https://bafkreiav7btv3nuei6znfpttelgln5tdcz7pfllcio333og4qwnbkwltoa.ipfs.nftstorage.link/",
-        name: "3",
-        attackWinRate: BigInt("35"),
-        nextEvolutionLevel: BigInt("3")
-      }
-      ],
-      BigInt("10"),
-      true,
-      BigInt("0"),
-      { skinColor: BigInt("0"), hornStyle: BigInt("0"), wingStyle: BigInt("0") }
-    ],
-    [
-      [{
-        image: "https://bafkreigw3j7bn3yhkbqt2ercytjhghzn462n5pxzyig4lptuyv4zv6gn6y.ipfs.nftstorage.link/",
-        name: "1",
-        attackWinRate: BigInt("20"),
-        nextEvolutionLevel: BigInt("1")
-      },
-      {
-        image: "https://bafkreiaqk7mr45wnjwtb4lyv4gpy5rloma3sxq3fq2t6s43tcy3ovnki4m.ipfs.nftstorage.link/",
-        name: "2",
-        attackWinRate: BigInt("25"),
-        nextEvolutionLevel: BigInt("2")
-      },
-      {
-        image: "https://bafkreiav7btv3nuei6znfpttelgln5tdcz7pfllcio333og4qwnbkwltoa.ipfs.nftstorage.link/",
-        name: "3",
-        attackWinRate: BigInt("35"),
-        nextEvolutionLevel: BigInt("3")
-      }
-      ],
-      BigInt("10"),
-      true,
-      BigInt("0"),
-      { skinColor: BigInt("0"), hornStyle: BigInt("0"), wingStyle: BigInt("0") }
-    ],
-    [
-      [{
-        image: "https://bafkreigw3j7bn3yhkbqt2ercytjhghzn462n5pxzyig4lptuyv4zv6gn6y.ipfs.nftstorage.link/",
-        name: "1",
-        attackWinRate: BigInt("20"),
-        nextEvolutionLevel: BigInt("1")
-      },
-      {
-        image: "https://bafkreiaqk7mr45wnjwtb4lyv4gpy5rloma3sxq3fq2t6s43tcy3ovnki4m.ipfs.nftstorage.link/",
-        name: "2",
-        attackWinRate: BigInt("25"),
-        nextEvolutionLevel: BigInt("2")
-      },
-      {
-        image: "https://bafkreiav7btv3nuei6znfpttelgln5tdcz7pfllcio333og4qwnbkwltoa.ipfs.nftstorage.link/",
-        name: "3",
-        attackWinRate: BigInt("35"),
-        nextEvolutionLevel: BigInt("3")
-      }
-      ],
-      BigInt("10"),
-      true,
-      BigInt("0"),
-      { skinColor: BigInt("0"), hornStyle: BigInt("0"), wingStyle: BigInt("0") }
-    ]
-  ];
 
-  const data = encodeFunctionData({
-    abi: nftAbi,
-    functionName: 'createSpeciesBatch',
-    args: [
-      species.map(s => s[0]) as any,
-      species.map(s => s[1]) as any,
-      species.map(s => s[2]) as any,
-      species.map(s => s[3]) as any,
-      species.map(s => s[4]) as any,
-    ]
-  })
-  const { config: configAddProposal } = usePrepareContractWrite({
-    address: `0x${process.env.DAO_ADDRESS?.slice(2)}`,
-    abi: daoAbi,
-    functionName: "createProposal",
-    args: ["test1", `0x${process.env.NFT_ADDRESS?.slice(2)}`, data, BigInt("10")]
-  });
 
-  const {
-    data: addProposalResult,
-    writeAsync: createProposal,
-    error: errorAddProposal,
-  } = useContractWrite(configAddProposal);
+  const onCreateProposal = async (itemId: any) => {
+
+    const species = JSON.parse(dataVote);
+    const data = encodeFunctionData({
+      abi: nftAbi,
+      functionName: 'createSpeciesBatch',
+      args: [
+        species.map((s:any) => s[0]) as any,
+        species.map((s:any) => s[1]) as any,
+        species.map((s:any) => s[2]) as any,
+        species.map((s:any) => s[3]) as any,
+        species.map((s:any) => s[4]) as any,
+      ]
+    })
+    const config = await prepareWriteContract({
+        address: `0x${process.env.DAO_ADDRESS?.slice(2)}`,
+        abi: daoAbi,
+        functionName: "createProposal",
+        args: [`${title}|${description}`, `0x${process.env.NFT_ADDRESS?.slice(2)}`, data, BigInt("10")]
+    })
+    const tx = await writeContract(config);
+    if (tx) {
+      setTitle("")
+      setDescription("")
+        fetchMyAPI();
+    }
+
+}
 
   const { config: configFaucet } = usePrepareContractWrite({
     address: `0x${process.env.FAUCET_ADDRESS?.slice(2)}`,
@@ -292,9 +314,11 @@ export const Create = (props: CardProps) => {
                   <p className="text-large">Create Proposal</p>
                 </CardHeader>
                 <CardBody className="grid grid-cols-1 gap-4 md:grid-cols-1">
-                  <Input label="Title" labelPlacement="outside" placeholder="Title" />
+                  <Input label="Title" labelPlacement="outside" placeholder="Title" value={title} onChange={handleChangeTitle} />
                   <Textarea
+                    value={description}
                     label="Description"
+                    onChange={handleChangeDescription}
                     placeholder="Enter your description"
                   />
                   <Select
@@ -310,7 +334,9 @@ export const Create = (props: CardProps) => {
                   </Select>
                   <Textarea
                     label="Data"
-                    placeholder="Enter your Data Vote"
+                    value={dataVote}
+                    onChange={handleChangeData}
+                    placeholder="Enter your Data"
                   />
                 </CardBody>
 
@@ -339,7 +365,7 @@ export const Create = (props: CardProps) => {
                               Faucet $JGT Token
                             </Button>
                         ) : (
-                            <Button color="primary" onPress={createProposal} radius="full">
+                            <Button color="primary" onPress={onCreateProposal} radius="full">
                               Create
                             </Button>
                         )
