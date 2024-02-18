@@ -209,9 +209,6 @@ export const Create = (props: CardProps) => {
           fetchMyAPI();
       }
   })
-
-  //create Proposal
-
   const onCreateProposal = async (itemId: any) => {
 
     const species = JSON.parse(dataVote);

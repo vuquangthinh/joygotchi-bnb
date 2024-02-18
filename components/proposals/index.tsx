@@ -7,12 +7,32 @@ import { Link, Card, CardHeader, CardBody, CardFooter, Avatar, Button, Progress 
 import NextLink from "next/link";
 import { readContracts, watchAccount, writeContract, prepareWriteContract } from '@wagmi/core'
 import { nftAbi, tokenAbi, daoAbi } from '../../components/play/abi';
+import { useBlockNumber ,} from 'wagmi'
+import { usePublicClient } from 'wagmi'
+import { decodeFunctionData } from 'viem'
+
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
 
 export const Proposals = () => {
   const [proposals, setProposals] = React.useState([])
   const [totalSuplly, setTotalSuplly] = React.useState(0)
   const [isFollowed, setIsFollowed] = React.useState(false);
+  const result = useBlockNumber()
+  const [block, setBlock] = React.useState()
+  const publicClient = usePublicClient()
+
+  React.useEffect(() => {
+    publicClient
+      .getBlock() // https://viem.sh/docs/actions/public/getBlock.html
+      .then((x:any) => {console.log(x.number);setBlock(x.number)})
+      .catch(error => console.log(error))
+  }, [publicClient])
+
   const fetchMyAPI = async () => {
+    
+    
     const totalProposalData: any = await readContracts({
       contracts: [
         {
@@ -24,6 +44,7 @@ export const Proposals = () => {
     })
     const totalProposal = totalProposalData[0].result;
     let proposals: any = [];
+    //https://op-bnb-testnet-explorer-api.nodereal.io/api/blocks/getBlocksList?page=1&pageSize=1
     for (let index = 0; index < parseInt(totalProposal); index++) {
       const proposal: any = await readContracts({
         contracts: [
@@ -35,6 +56,13 @@ export const Proposals = () => {
           }
         ],
       })
+      
+      const { args } = decodeFunctionData({
+        abi: nftAbi,
+        data: proposal[0].result.data,
+      })
+      console.log("value",args)
+      proposal[0].result.dataDecoded = args
       proposals.push(proposal[0].result);
     }
     
@@ -83,7 +111,8 @@ export const Proposals = () => {
                         <Avatar isBordered radius="full" size="md" src="/avatars/avatar-1.png" />
                         <div className="flex flex-col gap-1 items-start justify-center">
                           <h4 className="text-small font-semibold leading-none text-default-600">{proposal && proposal.creator.substring(0, 5)}...{proposal && proposal.creator.substring(proposal.creator.length - 4, proposal.creator.length)}</h4>
-                          <h5 className="text-small tracking-tight text-default-400">  Ended 7 days ago</h5>
+                          <h5 className="text-small tracking-tight text-default-400">Block ends:{proposal.deadline.toString()}</h5>
+                          
                         </div>
                       </div>
                       <Button
@@ -92,9 +121,8 @@ export const Proposals = () => {
                         radius="full"
                         size="sm"
                         variant={isFollowed ? "bordered" : "solid"}
-                        onPress={() => setIsFollowed(!isFollowed)}
                       >
-                        {isFollowed ? "Open" : "Closed"}
+                        {proposal && block && parseInt(block) < parseInt(proposal.deadline) ? "Open" : "Closed"}
                       </Button>
                     </CardHeader>
                     <CardBody className="px-3 py-0 text-small text-black">
@@ -103,6 +131,9 @@ export const Proposals = () => {
                       </p>
                       <p>
                         {proposal && proposal.description.split("|")[1]}
+                      </p>
+                      <p>
+                      {proposal && JSON.stringify(proposal.dataDecoded,null,4)}
                       </p>
                       <Progress
                         label="Agreement percent"
