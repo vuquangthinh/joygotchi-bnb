@@ -1,13 +1,9 @@
 "use client";
 import React from "react";
-import dynamic from "next/dynamic";
-import { TableWrapper } from "../table/table";
-import { Proposal } from "./proposal";
 import { Link, Card, CardHeader, CardBody, CardFooter, Avatar, Button, Progress } from "@nextui-org/react";
 import NextLink from "next/link";
-import { readContracts, watchAccount, writeContract, prepareWriteContract } from '@wagmi/core'
+import { readContracts } from '@wagmi/core'
 import { nftAbi, tokenAbi, daoAbi } from '../../components/play/abi';
-import { useBlockNumber ,} from 'wagmi'
 import { usePublicClient } from 'wagmi'
 import { decodeFunctionData } from 'viem'
 
@@ -18,8 +14,6 @@ import { decodeFunctionData } from 'viem'
 export const Proposals = () => {
   const [proposals, setProposals] = React.useState([])
   const [totalSuplly, setTotalSuplly] = React.useState(0)
-  const [isFollowed, setIsFollowed] = React.useState(false);
-  const result = useBlockNumber()
   const [block, setBlock] = React.useState()
   const publicClient = usePublicClient()
 
@@ -116,11 +110,11 @@ export const Proposals = () => {
                         </div>
                       </div>
                       <Button
-                        className={isFollowed ? "bg-transparent text-foreground border-default-200" : ""}
+                        className={proposal && block && parseInt(block) < parseInt(proposal.deadline) ? "bg-transparent text-foreground border-default-200" : ""}
                         color="primary"
                         radius="full"
                         size="sm"
-                        variant={isFollowed ? "bordered" : "solid"}
+                        variant={proposal && block && parseInt(block) < parseInt(proposal.deadline) ? "bordered" : "solid"}
                       >
                         {proposal && block && parseInt(block) < parseInt(proposal.deadline) ? "Open" : "Closed"}
                       </Button>

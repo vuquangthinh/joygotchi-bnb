@@ -27,11 +27,17 @@ import {
   useBalance,
   useNetwork,
   useSwitchNetwork,
-  useWaitForTransaction
+  useWaitForTransaction,
+  usePublicClient
 } from "wagmi";
+import { decodeFunctionData } from 'viem'
+
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
 
 export const Detail = (props: any) => {
-  const [proposal, setProposal] = React.useState({ description: "", total: "" })
+  const [proposal, setProposal] = React.useState({ description: "", total: "" , deadline:""})
   const [totalSuplly, setTotalSuplly] = React.useState(0)
   const [isFollowed, setIsFollowed] = React.useState(false);
   const [id, setId] = React.useState("");
@@ -40,6 +46,15 @@ export const Detail = (props: any) => {
   const [isBlance, setIsBlance] = React.useState(false)
   const [isEthBlance, setEthBlance] = React.useState(false)
   const [isApprove, setIsApprove] = React.useState(false)
+  const [block, setBlock] = React.useState()
+  const publicClient = usePublicClient()
+
+  React.useEffect(() => {
+    publicClient
+      .getBlock() // https://viem.sh/docs/actions/public/getBlock.html
+      .then((x:any) => {console.log(x.number);setBlock(x.number)})
+      .catch((error:any) => console.log(error))
+  }, [publicClient])
 
   const MAX_ALLOWANCE = BigInt('20000000000000000000000')
   const { address } = useAccount()
@@ -129,7 +144,11 @@ export const Detail = (props: any) => {
         }
       ],
     })
-
+    const { args } = decodeFunctionData({
+      abi: nftAbi,
+      data: proposal[0].result.data,
+    })
+    proposal[0].result.dataDecoded = args
     setProposal(proposal[0].result)
     console.log("proposals", proposal)
     const totalSupply: any = await readContracts({
@@ -158,6 +177,7 @@ export const Detail = (props: any) => {
       console.log("balance", tokenBlanceData)
       setEthBlance(true)
     }
+    
   }
 
   const { config: configFaucet } = usePrepareContractWrite({
@@ -255,6 +275,14 @@ export const Detail = (props: any) => {
 
             </div>
           </div>
+          <div className="flex flex-col gap-2">
+            <h3 className="text-xl font-semibold">Data</h3>
+            <div className="grid md:grid-cols-2 grid-cols-1 2xl:grid-cols-3 gap-5  justify-center w-full">
+            {proposal && JSON.stringify(proposal.dataDecoded,null,4)}
+
+            </div>
+          </div>
+
         </div>
 
         {/* Left Section */}
@@ -309,15 +337,15 @@ export const Detail = (props: any) => {
                         </Button>
                       ) : (
                         <>
-                          {parseInt(proposal.total) / totalSuplly > 1 ? (
-                            <Button color="primary" onPress={onClaim}>
-                              Claim
-                            </Button>
-                          ) : (
-                            <Button color="primary" onPress={onVote}>
+                        {proposal && block && parseInt(block) < parseInt(proposal.deadline) ? (
+                          <Button color="primary" onPress={onVote}>
                               Vote
-                            </Button>
-                          )}
+                          </Button>
+                        ):(
+                          <Button color="primary" onPress={onClaim}>
+                          Claim
+                        </Button>
+                        )}
                         </>
 
                       )
