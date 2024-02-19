@@ -37,7 +37,7 @@ import { decodeFunctionData } from 'viem'
 };
 
 export const Detail = (props: any) => {
-  const [proposal, setProposal] = React.useState({ description: "", total: "" , deadline:""})
+  const [proposal, setProposal] = React.useState({ description: "", total: "" , deadline:"" , dataDecoded :""})
   const [totalSuplly, setTotalSuplly] = React.useState(0)
   const [isFollowed, setIsFollowed] = React.useState(false);
   const [id, setId] = React.useState("");

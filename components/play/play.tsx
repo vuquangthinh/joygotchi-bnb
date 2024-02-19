@@ -23,33 +23,33 @@ export const Play = () => {
   }, []);
   return (
     <>
-      <main className="container mx-auto max-w-7xl  flex-grow">
+      <main className="container mx-auto max-w-7xl  flex-grow" >
         {active == "home" && (
           <Home />
         )}
         {active == "pet" && (
-          <section className="h-full max-w-lg  mx-auto font-medium bg-slate-50 px-8 bg-no-repeat bg-cover" style={{ backgroundImage: "url(/gotchi/Assets/Background.png)" }}>
+          <section className="h-full max-w-lg  mx-auto font-medium bg-slate-50 px-8 bg-no-repeat bg-cover" style={{ backgroundImage: "url(/gotchi/Assets/Background.png)"   , height:"800px" }}>
             <Pet />
           </section>
         )}
         {active == "battle" && (
-          <section className="h-full max-w-lg  mx-auto font-medium bg-slate-50 px-8 bg-no-repeat bg-cover" style={{ backgroundImage: "url(/gotchi/Assets/Background.png)" }}>
+          <section className="h-full max-w-lg  mx-auto font-medium bg-slate-50 px-8 bg-no-repeat bg-cover" style={{ backgroundImage: "url(/gotchi/Assets/Background.png)"  , height:"800px" }}>
             <Battle />
           </section>
         )}
         {active == "breed" && (
-          <section className="h-full max-w-lg  mx-auto font-medium bg-slate-50 px-8 bg-no-repeat bg-cover" style={{ backgroundImage: "url(/gotchi/Assets/Background.png)" }}>
+          <section className="h-full max-w-lg  mx-auto font-medium bg-slate-50 px-8 bg-no-repeat bg-cover" style={{ backgroundImage: "url(/gotchi/Assets/Background.png)"   , height:"800px"}}>
             <Breed />
           </section>
         )}
         {active == "reward" && (
-          <section className="h-full max-w-lg  mx-auto font-medium bg-slate-50 px-8 bg-no-repeat bg-cover" style={{ backgroundImage: "url(/gotchi/Assets/Background.png)" }}>
+          <section className="h-full max-w-lg  mx-auto font-medium bg-slate-50 px-8 bg-no-repeat bg-cover" style={{ backgroundImage: "url(/gotchi/Assets/Background.png)"  , height:"800px" }}>
             <Reward />
           </section>
         )}
-      </main>
-      <div className="absolute inset-x-0 bottom-0 ">
-        <div className={"grid h-full max-w-lg grid-cols-5 mx-auto font-medium bg-no-repeat bg-cover "} style={{ backgroundImage: "url(/gotchi/Assets/HUDBar2.png)" }}>
+      
+      <div className="">
+        <div className={"grid h-full max-w-lg grid-cols-5 mx-auto font-medium bg-no-repeat bg-cover "} style={{ backgroundImage: "url(/gotchi/Assets/HUDBar2.png)"  }}>
           <Link
             onClick={() => setActive("home")} className="inline-flex flex-col items-center justify-center px-5 hover:bg-gray-50 dark:hover:bg-gray-800 group pt-2">
             <Image
@@ -95,6 +95,7 @@ export const Play = () => {
         </div>
         <div ref={messagesEndRef} />
       </div>
+      </main>
     </>
   );
 };
