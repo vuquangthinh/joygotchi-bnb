@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Link, Card, CardHeader, CardBody, CardFooter, Avatar, Button, Progress } from "@nextui-org/react";
+import { Link, Card, CardHeader, CardBody, CardFooter, Avatar, Button, Progress, Image } from "@nextui-org/react";
 import NextLink from "next/link";
 import { readContracts } from '@wagmi/core'
 import { nftAbi, tokenAbi, daoAbi } from '../../components/play/abi';
@@ -20,13 +20,13 @@ export const Proposals = () => {
   React.useEffect(() => {
     publicClient
       .getBlock() // https://viem.sh/docs/actions/public/getBlock.html
-      .then((x:any) => {console.log(x.number);setBlock(x.number)})
+      .then((x: any) => { console.log(x.number); setBlock(x.number) })
       .catch(error => console.log(error))
   }, [publicClient])
 
   const fetchMyAPI = async () => {
-    
-    
+
+
     const totalProposalData: any = await readContracts({
       contracts: [
         {
@@ -50,16 +50,16 @@ export const Proposals = () => {
           }
         ],
       })
-      
+
       const { args } = decodeFunctionData({
         abi: nftAbi,
         data: proposal[0].result.data,
       })
-      console.log("value",args)
+      console.log("value", args)
       proposal[0].result.dataDecoded = args
       proposals.push(proposal[0].result);
     }
-    
+
     setProposals(proposals)
     console.log("proposals", proposals)
     const totalSupply: any = await readContracts({
@@ -71,8 +71,8 @@ export const Proposals = () => {
         }
       ],
     })
-    setTotalSuplly((parseInt(totalSupply[0].result)/1e18)*0.01)
-    console.log("totalSupply",(parseInt(totalSupply[0].result)/1e18)*0.01)
+    setTotalSuplly((parseInt(totalSupply[0].result) / 1e18) * 0.01)
+    console.log("totalSupply", (parseInt(totalSupply[0].result) / 1e18) * 0.01)
   }
   React.useEffect(() => {
     fetchMyAPI();
@@ -107,6 +107,7 @@ export const Proposals = () => {
                           <h4 className="text-small font-semibold leading-none text-default-600">{proposal && proposal.creator.substring(0, 5)}...{proposal && proposal.creator.substring(proposal.creator.length - 4, proposal.creator.length)}</h4>
                           <h5 className="text-small tracking-tight text-default-400">Block ends:{proposal.deadline.toString()}</h5>
                           
+
                         </div>
                       </div>
                       <Button
@@ -127,12 +128,28 @@ export const Proposals = () => {
                         {proposal && proposal.description.split("|")[1]}
                       </p>
                       <p>
-                      {proposal && JSON.stringify(proposal.dataDecoded,null,4)}
+                      {proposal && proposal.dataDecoded[0][0].map((pet: any) => (
+                            <Card className="py-4 m-4" >
+                              <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+                                <p className="text-tiny uppercase font-bold">Name : {pet.name}</p>
+                                <small className="text-default-500">Attack Win Rate :{pet.attackWinRate.toString()}</small>
+                                <small className="text-default-500">Next Evolution Level:{pet.nextEvolutionLevel.toString()}</small>
+                              </CardHeader>
+                              <CardBody className="overflow-visible py-2">
+                                <Image
+                                  alt="Card background"
+                                  className="object-cover rounded-xl"
+                                  src={pet.image}
+                                  width="200px"
+                                />
+                              </CardBody>
+                            </Card>
+                          ))}
                       </p>
                       <Progress
                         label="Agreement percent"
                         size="md"
-                        value={proposal && parseInt(proposal.total)/totalSuplly}//proposal && proposal.total/( 1000000000 *1%)
+                        value={proposal && parseInt(proposal.total) / totalSuplly}//proposal && proposal.total/( 1000000000 *1%)
                         maxValue={100}
                         color="success"
                         showValueLabel={true}

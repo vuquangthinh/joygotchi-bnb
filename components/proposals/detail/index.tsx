@@ -8,10 +8,7 @@ import {
   CardBody,
   Button,
   Input,
-  Textarea,
-  CardFooter,
-  Select,
-  SelectItem,
+  Image,
   Progress,
   Link
 } from "@nextui-org/react";
@@ -37,7 +34,7 @@ import { decodeFunctionData } from 'viem'
 };
 
 export const Detail = (props: any) => {
-  const [proposal, setProposal] = React.useState({ description: "", total: "" , deadline:"" , dataDecoded :""})
+  const [proposal, setProposal] = React.useState({ description: "", total: "" , deadline:"" , dataDecoded :[[[]]]})
   const [totalSuplly, setTotalSuplly] = React.useState(0)
   const [isFollowed, setIsFollowed] = React.useState(false);
   const [id, setId] = React.useState("");
@@ -276,10 +273,26 @@ export const Detail = (props: any) => {
             </div>
           </div>
           <div className="flex flex-col gap-2">
-            <h3 className="text-xl font-semibold">Data</h3>
+            <h3 className="text-xl font-semibold">Pet</h3>
             <div className="grid md:grid-cols-2 grid-cols-1 2xl:grid-cols-3 gap-5  justify-center w-full">
-            {proposal && JSON.stringify(proposal.dataDecoded,null,4)}
-
+            
+            {proposal && proposal.dataDecoded[0][0].map((pet: any) => (
+                            <Card className="py-4 m-4" >
+                              <CardHeader className="pb-0 pt-2 px-4 flex-col items-start">
+                                <p className="text-tiny uppercase font-bold">Name : {pet.name}</p>
+                                <small className="text-default-500">Attack Win Rate :{pet.attackWinRate.toString()}</small>
+                                <small className="text-default-500">Next Evolution Level:{pet.nextEvolutionLevel.toString()}</small>
+                              </CardHeader>
+                              <CardBody className="overflow-visible py-2">
+                                <Image
+                                  alt="Card background"
+                                  className="object-cover rounded-xl"
+                                  src={pet.image}
+                                  width="200px"
+                                />
+                              </CardBody>
+                            </Card>
+                          ))}
             </div>
           </div>
 
