@@ -9,6 +9,8 @@ import {
 } from "wagmi";
 import { useDebounce } from './useDebounce';
 import { readContracts, watchAccount, writeContract, prepareWriteContract } from '@wagmi/core'
+import { decodeAbiParameters } from 'viem'
+
 
 export const Breed = () => {
     const [isAddress, setIsAddress] = React.useState<any>(false)
@@ -124,21 +126,27 @@ export const Breed = () => {
             setIsAddress(false);
         };
         //api/tx/getAssetTransferByAddress?page=1&&pageSize=20&address=
-        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/token/getTokensByAddress?address=${process.env.NFT_ADDRESS}&pageSize=0x64`)
+        //let response: any = await fetch(`${process.env.EXPLORER_URL}/api/tx/getAssetTransferByAddress?page=${page}&type=721&pageSize=20&address=${process.env.NFT_ADDRESS}`)
+        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/tx/getAssetTransferByAddress?page=1&type=721&pageSize=40&address=${address}`)
         response = await response.json()
         const petArr: any = [];
         const petArrA: any = [];
         const petArrB: any = [];
         console.log("petcheck", response)
-        if (response.items) {
-            for (const element of response.items) {
+        if (response.data?.list) {
+            for (const element of response.data?.list) {
+                const values = decodeAbiParameters(
+                    [{ name: 'x', type: 'uint32' }],
+                    element.erc721TokenId,
+                  )
+                  const data = values[0].toString()
                 const Info: any = await readContracts({
                     contracts: [
                         {
                             address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
                             abi: nftAbi,
                             functionName: 'getPetInfo',
-                            args: [element.id],
+                            args: [BigInt(data)],
                         }
                     ],
                 })
@@ -148,7 +156,7 @@ export const Breed = () => {
                             address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
                             abi: nftAbi,
                             functionName: 'getPetAttributes',
-                            args: [element.id],
+                            args: [BigInt(data)],
                         }
                     ],
                 })
@@ -158,13 +166,13 @@ export const Breed = () => {
                             address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
                             abi: nftAbi,
                             functionName: 'getPetEvolutionInfo',
-                            args: [element.id],
+                            args: [BigInt(data)],
                         }
                     ],
                 })
-                if (element.owner.hash == address) {
+                
                     petArr.push({
-                        value: element.id,
+                        value: BigInt(data),
                         label: Info[0].result[0],
                         sex: InfoAttr[0].result[4],
                         status: Info[0].result[1],
@@ -172,7 +180,7 @@ export const Breed = () => {
                     })
                     if (InfoAttr[0].result[4] == 0 && Info[0].result[1] !== 4 && InfoEvol[0].result[1] == 2) {
                         petArrA.push({
-                            value: element.id,
+                            value: BigInt(data),
                             label: Info[0].result[0],
                             sex: InfoAttr[0].result[4],
                             status: Info[0].result[1],
@@ -181,14 +189,14 @@ export const Breed = () => {
                     }
                     if (InfoAttr[0].result[4] == 1 && Info[0].result[1] !== 4 && InfoEvol[0].result[1] == 2) {
                         petArrB.push({
-                            value: element.id,
+                            value: BigInt(data),
                             label: Info[0].result[0],
                             sex: InfoAttr[0].result[4],
                             status: Info[0].result[1],
                             evol: InfoEvol[0].result[1]
                         })
                     }
-                }
+                
             }
             console.log("petArr", petArr)
             console.log("petArrA", petArrA)

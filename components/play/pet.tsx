@@ -26,6 +26,7 @@ import { readContracts, watchAccount, writeContract, prepareWriteContract } from
 
 import CountDownTimer from "./CountDownTimer";
 import Slider from "react-slick";
+import { decodeAbiParameters } from 'viem'
 
 const nftAddress = process.env.NFT_ADDRESS;
 const MAX_ALLOWANCE = BigInt('20000000000000000000000')
@@ -91,34 +92,38 @@ export const Pet = () => {
             setIsAddress(false);
         };
        // https://op-bnb-mainnet-explorer-api.nodereal.io/api/token/getTokensByAddress?address=0x7fdce7ecc58b799b287c44ff57f159f5579e4bf8&pageSize=0x64
-        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/token/getTokensByAddress?address=${process.env.NFT_ADDRESS}&pageSize=0x64`)
+       //https://op-bnb-testnet-explorer-api.nodereal.io/api/token/getxTokensByAddress?address=0x5950cF7303605acBC5B274E8cA658542832Cb9a3&pageSize=0x64
+       //let response: any = await fetch(`${process.env.EXPLORER_URL}/api/tx/getAssetTransferByAddress?page=${page}&type=721&pageSize=20&address=${process.env.NFT_ADDRESS}`)
+        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/tx/getAssetTransferByAddress?page=1&type=721&pageSize=20&address=${address}`)
         response = await response.json()
         const petArr: any = [];
         let checkPet = false;
         let checkPetId = await localStorage.getItem('pet')
-        if (response.items) {
-            for (const element of response.items) {
-
-                if (element.owner.hash == address) {
-
+        if (response?.data) {
+        
+            for (const element of response?.data?.list) {
+                const values = decodeAbiParameters(
+                    [{ name: 'x', type: 'uint32' }],
+                    element.erc721TokenId,
+                  )
                     const Info: any = await readContracts({
                         contracts: [
                             {
                                 address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
                                 abi: nftAbi,
                                 functionName: 'getPetInfo',
-                                args: [element.id],
+                                args: [BigInt(values[0].toString())],
                             }
                         ],
                     })
-                    if (element.id == checkPetId) {
+                    if (values[0].toString() == checkPetId) {
                         checkPet = true
                     }
                     petArr.push({
-                        value: element.id,
+                        value: values[0].toString(),
                         label: Info[0].result[0]
                     })
-                }
+                
             }
         }
 

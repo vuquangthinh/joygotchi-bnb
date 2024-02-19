@@ -10,6 +10,7 @@ import { Card, CardBody, CardHeader, Divider } from "@nextui-org/react";
 import { nftAbi, tokenAbi } from './abi';
 import { Image } from "@nextui-org/react";
 import CountDownTimer from "./CountDownTimer";
+import { decodeAbiParameters } from 'viem'
 
 const fetcher = async (...args: Parameters<typeof fetch>) => {
     const res = await fetch(...args);
@@ -18,7 +19,7 @@ const fetcher = async (...args: Parameters<typeof fetch>) => {
 
 export const Battle = () => {
     const { address } = useAccount();
-    const [page, setPage] = React.useState(0);
+    const [page, setPage] = React.useState(1);
     const [ownPet, setOwnPet] = useState<any>(null)
     const [selectedPet, setSelectedPet] = useState<any>('')
     const [activity, setActivity] = useState<any>([])
@@ -281,13 +282,19 @@ export const Battle = () => {
     }
 
     const getPetList = async () => {
-        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/tx/getAssetTransferByAddress?page=${page}&&pageSize=20&address=${process.env.NFT_ADDRESS}`)
-        response = await response.json()
-        let petList = response?.items?.filter((item: any) => item.owner.hash !== address && item.owner.hash !== '0x0000000000000000000000000000000000000000');
-
         let newPetList = [];
-        for (const data in petList) {
-            console.log("petList", data)
+        let response: any = await fetch(`${process.env.EXPLORER_URL}/api/tx/getAssetTransferByAddress?page=${page}&type=721&pageSize=20&address=${process.env.NFT_ADDRESS}`)
+        response = await response.json()
+        let petListData : any =  response?.data?.list?.filter((item: any) => item.to !== address && item.from == '0x0000000000000000000000000000000000000000');
+        console.log("petList1",petListData)
+        
+        for (const element of petListData) {
+            const values = decodeAbiParameters(
+                [{ name: 'x', type: 'uint32' }],
+                element.erc721TokenId,
+              )
+              const data = values[0].toString()
+              console.log("values",values)
             // code block to be executed
             const res: any = await readContracts({
                 contracts: [
@@ -295,7 +302,7 @@ export const Battle = () => {
                         address: `0x${process.env.NFT_ADDRESS?.slice(2)}`,
                         abi: nftAbi,
                         functionName: 'getPetInfo',
-                        args: [BigInt(data)],
+                        args: [BigInt(values[0].toString())],
                     }
                 ],
             })
@@ -328,7 +335,6 @@ export const Battle = () => {
 
         setPetList(newPetList);
         setLoadingState(true);
-        console.log("petList", newPetList)
     }
     React.useEffect(() => {
 
