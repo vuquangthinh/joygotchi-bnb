@@ -29,7 +29,12 @@ export const SidebarWrapper = () => {
           <div className={Sidebar.Body()}>
 
             <SidebarMenu title="Main Menu">
-              
+            <SidebarItem
+                title="Faucet"
+                icon={<HomeIcon />}
+                isActive={pathname === "/faucet"}
+                href="/faucet"
+              />
               <SidebarItem
                 title="Proposals"
                 icon={<HomeIcon />}
