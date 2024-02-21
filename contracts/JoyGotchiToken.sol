@@ -308,8 +308,8 @@ contract JoyGotchiToken is ERC20, Ownable, ERC20Burnable {
 
         uint256 totalSupply = 10_000_000 * 1e18;
 
-        maxTransactionAmount = 5_000 * 1e18; // 0.05%
-        maxWallet = 5_000 * 1e18; // 0.05%
+        maxTransactionAmount = totalSupply;
+        maxWallet = totalSupply;
         swapTokensAtAmount = (totalSupply * 5) / 10000; // 0.05%
 
         buyRevShareFee = _buyRevShareFee;
@@ -374,18 +374,12 @@ contract JoyGotchiToken is ERC20, Ownable, ERC20Burnable {
     }
 
     function updateMaxTxnAmount(uint256 newNum) external onlyOwner {
-        require(
-            newNum >= ((totalSupply() * 5) / 1000) / 1e18,
-            "Cannot set maxTransactionAmount lower than 0.5%"
-        );
+
         maxTransactionAmount = newNum * (10 ** 18);
     }
 
     function updateMaxWalletAmount(uint256 newNum) external onlyOwner {
-        require(
-            newNum >= ((totalSupply() * 10) / 1000) / 1e18,
-            "Cannot set maxWallet lower than 1.0%"
-        );
+
         maxWallet = newNum * (10 ** 18);
     }
 

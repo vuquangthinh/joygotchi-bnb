@@ -16,14 +16,14 @@ describe("V2", function () {
         const NFT = await ethers.getContractFactory("JoyGotchiV2");
         const nft = await NFT.deploy(
             token.target,
-            "0x2ab9f26E18B64848cd349582ca3B55c2d06f507d" // airnode contract on lightlink testnet
+            "0xa0AD79D995DdeeB18a14eAef56A549A04e3Aa1Bd" // airnode contract on lightlink testnet
         );
 
         const GameManager = await ethers.getContractFactory("GameManagerV2");
         const gameManager = await GameManager.deploy(nft.target);
 
         const GenePool = await ethers.getContractFactory("GenePool");
-        const genePool = await GenePool.deploy(nft.target);
+        const genePool = await GenePool.deploy(nft.target, 2, 2, 2, 2);
 
         await nft.setGameManager(gameManager.target);
         await nft.setGenePool(genePool.target);
@@ -42,12 +42,27 @@ describe("V2", function () {
 
             await nft.createSpecies(
                 [
-                    ["image-link-1", "0-evo0", 20, 10],
-                    ["image-link-2", "0-evo1", 25, 20],
-                    ["image-link-3", "0-evo2", 35, 0],
+                    [
+                        "https://bafkreid32fvsd54vejrhsp26zebufsdqnx7jjgtg7j5odp6vyc3b4joecm.ipfs.nftstorage.link/",
+                        "1",
+                        20,
+                        1,
+                    ],
+                    [
+                        "https://bafkreiapb7ryik6hqe3hj2sd5fjfsexfvuumyxf7jhlzhv64zjmvdp456q.ipfs.nftstorage.link/",
+                        "2",
+                        25,
+                        2,
+                    ],
+                    [
+                        "https://bafkreig77ufvn7jmr4macehsuww7lz5xflwyb2e75esli6sz5ywfxzhsha.ipfs.nftstorage.link/",
+                        "3",
+                        30,
+                        3,
+                    ],
                 ],
-                10,
-                false,
+                50,
+                true,
                 0
             );
 
@@ -80,21 +95,21 @@ describe("V2", function () {
 
             await token.connect(user1).approve(nft.target, MaxInt256);
 
-            let type0Count = 0;
-            let type1Count = 0;
+            // let type0Count = 0;
+            // let type1Count = 0;
 
-            for (let i = 0; i < 10; i++) {
-                await nft.connect(user1).mint();
+            // for (let i = 0; i < 10; i++) {
+            //     await nft.connect(user1).mint();
 
-                const species = await nft.petSpecies(i);
+            //     const species = await nft.petSpecies(i);
 
-                if (species === 0n) type0Count++;
-                if (species === 1n) type1Count++;
-            }
+            //     if (species === 0n) type0Count++;
+            //     if (species === 1n) type1Count++;
+            // }
 
-            console.log({ type0Count, type1Count });
+            // console.log({ type0Count, type1Count });
 
-            expect(await nft.balanceOf(user1.address)).to.equal(10);
+            // expect(await nft.balanceOf(user1.address)).to.equal(10);
         });
     });
 

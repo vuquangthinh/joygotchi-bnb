@@ -5,7 +5,7 @@ contract GenePool {
     address public nft;
     uint256 public totalGeneNum;
     uint256 public speciesCount;
-    uint256 public eyeColorGeneNum;
+    
     uint256 public skinColorGeneNum;
     uint256 public hornStyleGeneNum;
     uint256 public wingStyleGeneNum;
@@ -21,13 +21,11 @@ contract GenePool {
 
     constructor(
         address _joyGotchiNFT,
-        uint256 _eyeColorGeneNum,
         uint256 _skinColorGeneNum,
         uint256 _hornStyleGeneNum,
         uint256 _wingStyleGeneNum
     ) {
         nft = _joyGotchiNFT;
-        eyeColorGeneNum = _eyeColorGeneNum;
         skinColorGeneNum = _skinColorGeneNum;
         hornStyleGeneNum = _hornStyleGeneNum;
         wingStyleGeneNum = _wingStyleGeneNum;
@@ -48,20 +46,20 @@ contract GenePool {
         return speciesCount;
     }
 
-    function generateRandomGene(address _account, uint _nftId, uint seed) external view onlyNFT returns (uint256 species, uint256 eyeColor, uint256 skinColor, uint256 hornStyle, uint256 wingStyle) {
+    function generateGene(address _account, uint _nftId, uint seed) external view onlyNFT returns (uint256 species, uint256 sex) {
         uint256 random = uint256(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, _account, _nftId, seed)));
         uint256 randomSpeciesNum = random % totalGeneNum;
+        species = 0;
         for (uint256 i = 0; i < speciesCount; i++) {
             if (randomSpeciesNum >= speciesToSpawnCondition[i].gte && randomSpeciesNum <= speciesToSpawnCondition[i].lte) {
                 species = i;
                 break;
             }
         }
-        eyeColor = random % eyeColorGeneNum;
-        skinColor = random % skinColorGeneNum;
-        hornStyle = random % hornStyleGeneNum;
-        wingStyle = random % wingStyleGeneNum;
+        sex = (random) % 2;
     }
+
+
     receive() external payable {
         payable(nft).transfer(msg.value);
     }

@@ -18,7 +18,7 @@ contract JoyGotchiFaucet {
 
     function getJoy(address _to) external {
         require(_isActive, "Faucet is not active");
-        token.transfer(_to, 2000 ether);
+        token.transfer(_to, 20000 ether);
     }
 
     function withdrawAll(address _to) external {

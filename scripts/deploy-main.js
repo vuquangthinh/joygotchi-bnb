@@ -34,7 +34,7 @@ async function main() {
     console.log("GameManager:", gameManager.target);
 
     const GenePool = await ethers.getContractFactory("GenePool");
-    const genePool = await GenePool.deploy(modeNFT.target, 2, 2, 2, 2);
+    const genePool = await GenePool.deploy(modeNFT.target, 2, 2, 2);
     await genePool.waitForDeployment();
     console.log("GenePool:", genePool.target);
 
@@ -46,10 +46,9 @@ async function main() {
     console.log("Settings");
     await modeNFT.setGameManager(gameManager.target);
 
-    await modeNFT.setGenePool(gameManager.target);
+    await modeNFT.setGenePool(genePool.target);
 
-    await token.transfer(faucet.target, ethers.parseEther("100000")); // move 100k to faucet
-
+    await token.transfer(faucet.target, ethers.parseEther("1000000"));
     await token.enableTrading();
     // enable trading
 

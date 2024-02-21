@@ -14,7 +14,7 @@ async function main() {
     const [deployer] = await ethers.getSigners();
     let nonce = await deployer.getNonce();
 
-    console.log("Deploying contracts with the account:", deployer.address);
+    // console.log("Deploying contracts with the account:", deployer.address);
 
     // const Token = await ethers.getContractFactory("JoyGotchiToken");
     // const token = await Token.deploy(ROUTER_ADDRESS);
@@ -34,7 +34,7 @@ async function main() {
     // const GenePool = await ethers.getContractFactory("GenePool");
     // const genePool = await GenePool.deploy(
     //     modeNFT.target,
-    //     2, 2, 2, 2);
+    //     2, 2, 2);
     // await genePool.waitForDeployment();
     // console.log("GenePool:", genePool.target);
 
@@ -43,21 +43,22 @@ async function main() {
     // await faucet.waitForDeployment();
     // console.log("Faucet:", faucet.target);
 
-    // JoyGotchiToken: 0xFcC9665bc183A899994E7793ecA500947D67134c
-    // JoyGotchi: 0x6Ed360D1D320E55E7Cb1e7c3a4D4476dBa8E6740
-    // GameManager: 0xAC4fBfb9765218E6322f86E964c75B7975CB48A5
-    // GenePool: 0xBB064BEDe0f63099626BAeD88098D97e207e2428
-    // Faucet: 0xE94859c241eF396263fC9C9CBC43e9EC2656694D
-    // DAO: 0xCF0721c0b51ACe51B80D35cD3628c58eb5A06499
-    const token = await ethers.getContractAt('JoyGotchiToken', '0xFcC9665bc183A899994E7793ecA500947D67134c');
-    const modeNFT = await ethers.getContractAt('JoyGotchiV2', '0x6Ed360D1D320E55E7Cb1e7c3a4D4476dBa8E6740');
-    const gameManager = await ethers.getContractAt('GameManagerV2', '0xAC4fBfb9765218E6322f86E964c75B7975CB48A5');
-    const faucet = await ethers.getContractAt('JoyGotchiFaucet', '0xE94859c241eF396263fC9C9CBC43e9EC2656694D');
+    // JoyGotchiToken: 0x0B47EEB7290D413D2a51273cf7fd440c6f53E8e4
+    // JoyGotchi: 0xe966Dd4DfBc97F37470B8F9C26Fc83EFa15339E5
+    // GameManager: 0x9Ac3005c73A4a0cF80328778E86c6B87e2D50cb8
+    // GenePool: 0x965EF3B3c521788a795EFd86f7316063d4dA0F1F
+    // Faucet: 0x20449b21e2DDb4a1C335C2e65DD731482450558f
+    // DAO: 0x410EaA07644593d428568eA1B6b435e6f6Ad3C4D
+    const token = await ethers.getContractAt('JoyGotchiToken', '0x0B47EEB7290D413D2a51273cf7fd440c6f53E8e4');
+    const modeNFT = await ethers.getContractAt('JoyGotchiV2', '0xe966Dd4DfBc97F37470B8F9C26Fc83EFa15339E5');
+    const gameManager = await ethers.getContractAt('GameManagerV2', '0x9Ac3005c73A4a0cF80328778E86c6B87e2D50cb8');
+    const faucet = await ethers.getContractAt('JoyGotchiFaucet', '0x20449b21e2DDb4a1C335C2e65DD731482450558f');
+    const genePool = await ethers.getContractAt('GenePool', '0x965EF3B3c521788a795EFd86f7316063d4dA0F1F');
 
     console.log("Settings");
     await modeNFT.setGameManager(gameManager.target);
 
-    await modeNFT.setGenePool(gameManager.target);
+    await modeNFT.setGenePool(genePool.target);
 
     await token.transfer(faucet.target, ethers.parseEther("100000")); // move 100k to faucet
 
